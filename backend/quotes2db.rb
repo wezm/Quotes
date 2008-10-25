@@ -16,8 +16,29 @@ db_file = ARGV.shift
 $db = Sequel.sqlite(db_file)
 $quote_id_mapping = {}
 $linked_quotes = {}
+$favourite_quotes = {}
 
-def add_profile(profile_file)
+def add_profile(user, profile_file)
+    profile_lines = File.readlines(profile_file)
+
+    profile = {}
+    profile[:username] = user
+    profile[:password] = profile_lines.shift.chomp
+    profile[:name] = profile_lines.shift.chomp
+    profile[:name] += " " + profile_lines.shift.chomp
+    profile[:last_posted] = profile_lines.shift.to_i
+    profile_lines.shift # profile[4] is always zero
+    favourite_quote_id = profile_lines.shift.chomp
+
+    # Convert zeros to nil
+    profile[:last_posted] = nil if profile[:last_posted] == 0
+
+    if favourite_quote_id != "0"
+        $favourite_quotes[user] = favourite_quote_id
+    end
+
+    $db[:users] << profile
+    puts "Inserted profile for #{user}"
 end
 
 def add_quotes(user, quotes_file)
@@ -26,7 +47,8 @@ def add_quotes(user, quotes_file)
         line.chomp!
         line_number += 1
 
-        # Split on pipe
+        # Split on pipe, ratings are ignored as they aren't in a normalised
+        # format
         quote, poster, posted, ratings, link_id = line.split('|')
 
         posted = posted.to_i 
@@ -63,13 +85,13 @@ end
 
 puts "Processing files"
 ARGV.each do |file_path|
-    File.open(file_path) do |file|
-        if file_path =~ /([^\/]+)\.quotes/
+    if file_path =~ /([^\/]+)\.quotes/
+        File.open(file_path) do |file|
             puts "Adding quotes for #{file_path}"
             add_quotes($1, file)
-        elsif file_path =~ /([^\/]+)\.profile/
-            add_profile(file)
         end
+    elsif file_path =~ /([^\/]+)\.profile/
+        add_profile($1, file_path)
     end
 end
 
@@ -85,4 +107,17 @@ $linked_quotes.each do |quote_id,old_id|
     quote.update(:linked_quote_id => $quote_id_mapping[old_id])
     puts "Updated quote #{quote_id}"
 end
+
+puts "Resolving favourite quotes"
+$favourite_quotes.each do |username, old_id|
+    profile = $db[:users].filter(:username => username)
+    if profile.nil?
+        puts "Unable to get profile for #{username}"
+        exit 4;
+    end
+
+    profile.update(:favourite_quote_id => $quote_id_mapping[old_id])
+    puts "Updated profile #{username}, set favourite to #{$quote_id_mapping[old_id]}"
+end
+
 

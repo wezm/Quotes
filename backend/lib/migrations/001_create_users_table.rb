@@ -4,8 +4,7 @@ class CreateUsersTable < Sequel::Migration
         execute <<-END_SQL
             CREATE TABLE users (
                 username varchar primary key,
-                first_name varchar not null,
-                last_name varchar not null,
+                name varchar not null,
                 password varchar not null,
                 last_posted timestamp,
                 favourite_quote_id integer

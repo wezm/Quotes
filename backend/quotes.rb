@@ -4,13 +4,18 @@ require 'sinatra'
 require 'dm-core'
 require 'json'
 require 'erb'
+require 'models'
 
 configure :development do
-  DataMapper.setup(:default, "sqlite3://#{File.dirname(__FILE__)}/quotes.db")
+  db = "sqlite3://#{File.dirname(__FILE__)}/test2.db"
+  db = "sqlite3:///Users/wmoore/Source/Quotes/backend/test2.db"
+  puts db
+  DataMapper.setup(:default, db)
 end
 
 get '/' do
-  erb :index
+  quotes = Quote.all(:limit => 10)
+  erb :index, :locals => { :quotes => quotes }
 end
 
 get '/quotes' do

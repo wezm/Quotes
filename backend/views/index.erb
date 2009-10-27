@@ -10,7 +10,9 @@
 </head>
 
 <body>
-  <h1>Hi</h1>
-
+  <h1>Quotes</h1>
+  <% quotes.each do |quote| %>
+    <p><%= quote.quote_body %> - <%= quote.user.username %><p>
+  <% end %>
 </body>
 </html>

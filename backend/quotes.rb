@@ -13,6 +13,11 @@ configure :development do
   DataMapper.setup(:default, db)
 end
 
+helpers do
+  include Rack::Utils
+  alias_method :h, :escape_html
+end
+
 get '/' do
   quotes = Quote.all(:limit => 10)
   erb :index, :locals => { :quotes => quotes }

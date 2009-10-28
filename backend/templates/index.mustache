@@ -19,6 +19,10 @@
 	    padding-left: 1em;
 	    margin-left: 1em;
 	  }
+	  blockquote p {
+	    color: #eee;
+	    margin: 0.5em 0;
+	  }
 	</style>
 	<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.3.2/jquery.min.js" charset="utf-8"></script>
 	<script type="text/javascript">
@@ -29,11 +33,11 @@
 
 <body>
   <h1>Recent Quotes</h1>
-  <% quotes.each do |quote| %>
-      <blockquote cite="/path/to/user">
-        <p><%= h quote.quote_body %></p>
-        &mdash; <%= h quote.user.username %>
-      </blockquote>
-  <% end %>
+  {{#quotes}}
+    <blockquote cite="/path/to/user">
+      <p>{{body}}</p>
+      &mdash; {{quotee}}
+    </blockquote>
+  {{/quotes}}
 </body>
 </html>

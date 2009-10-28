@@ -29,8 +29,8 @@ module Quotes
     set :namespace, Quotes
 
     configure :development do
-      db = "sqlite3://#{File.dirname(__FILE__)}/test2.db"
-      db = "sqlite3:///Users/wmoore/Source/Quotes/backend/test2.db"
+      db = "sqlite3://#{File.dirname(__FILE__)}/quotes.db"
+      db = "sqlite3:///Users/wmoore/Source/Quotes/backend/quotes.db"
       puts "Using db at #{db}"
       DataMapper.setup(:default, db)
     end
@@ -43,6 +43,7 @@ module Quotes
     get '/' do
       # quotes = Quote.all(:limit => 10)
       @quotes = Quote.all(:order => [:created_at.desc], :limit => 10)
+      @users = User.all
       mustache :index
       # erb :index, :locals => { :quotes => quotes }
     end

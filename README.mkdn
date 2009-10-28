@@ -38,3 +38,9 @@ For development, using shotgun:
 Or with thin:
 
     thin config.ru
+
+### Creating the Initial DB ###
+
+This is more for my own documentation. Nonetheless:
+
+    ruby quotes2db.rb quotes.db quotes/*.{profile,quotes}

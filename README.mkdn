@@ -11,4 +11,30 @@ This app is the result of digging up those quote files, converting them to an SQ
 Install/Run
 -----------
 
-You will need at least sinatra and mustache. I intend to use thin proxied through a front-end Cherokee webserver. More details to come.
+### Prerequisites ###
+
+You will need the following gems:
+
+* dm-core
+* do_sqlite3
+* sinatra
+* mustache
+
+Optional but handy for development:
+
+* shotgun
+
+__Note:__ mustache needs you to have previously setup [Gemcutter](http://gemcutter.org/) as a gem source.
+
+### Run ###
+
+I intend to use [thin](http://code.macournoyer.com/thin/) proxied through a front-end
+[Cherokee](http://www.cherokee-project.com/) webserver.
+
+For development, using shotgun:
+
+    shotgun config.ru
+
+Or with thin:
+
+    thin config.ru

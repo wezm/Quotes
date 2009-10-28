@@ -1,0 +1,14 @@
+Quotes
+======
+
+History
+-------
+
+When I was in uni I wrote a PHP app for my group of friends to be able to log quotes from each other. These aren't so much profound quotes but humous ones. The PHP app managed the user profiles and quotes in a series of text files as a database was not available on the uni server that hosted it.
+
+This app is the result of digging up those quote files, converting them to an SQLite db and wrapping a Sinatra app around it.
+
+Install/Run
+-----------
+
+You will need at least sinatra and mustache. I intend to use thin proxied through a front-end Cherokee webserver. More details to come.

@@ -12,11 +12,22 @@ module Quotes
         end
 
         def quotes
-          @quotes.map { |q| { :body => q.quote_body, :quotee => q.user.username } }
+          @quotes.map do |q|
+            {
+              :body => q.quote_body,
+              :quotee => q.user.username,
+            }
+          end
         end
 
         def users
-          @users.map { |u| { :name => u.username, :avatar => gravatar(u.email, 50) } }
+          @users.map do |u|
+            {
+              :name => u.username,
+              :avatar => gravatar(u.email, 50),
+              :user_path => "/users/#{u.username}"
+            }
+          end
         end
 
       end

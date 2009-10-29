@@ -25,15 +25,20 @@
 	    margin: 0.5em 0;
 	  }
 
-	  div.user {
+	  .user {
 	    float: left;
-	    margin: 1em;
-	  }
-	  div.user img {
+      padding: 0.5em;
+	    text-align: center;
 	    display: block;
-	    margin: 0 auto;
 	  }
-	  div.user span.username {
+	  .user:hover {
+	    background: #ccc;
+	  }
+	  .user img {
+	    display: block;
+	    padding: 0 1em;
+	  }
+	  .user span.username {
 	  }
 	</style>
 	<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.3.2/jquery.min.js" charset="utf-8"></script>
@@ -48,10 +53,10 @@
   <h2>People</h2>
 
   {{#users}}
-    <div class="user">
+    <a class="user" href="{{user_path}}">
       <img src="{{avatar}}" alt="{{name}}'s avatar" />
       <span class="username">{{name}}</span>
-    </div>
+    </a>
   {{/users}}
 
   <h2>Recent Quotes</h2>

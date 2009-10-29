@@ -2,8 +2,6 @@ require 'rubygems'
 
 require 'sinatra/base'
 require 'dm-core'
-require 'json'
-require 'erb'
 require 'mustache/sinatra'
 
 require 'models'
@@ -28,32 +26,30 @@ module Quotes
     # we'd want to do `set :namespace, Hurl::App`
     set :namespace, Quotes
 
+    enable :sessions
+
     configure :development do
-      db = "sqlite3://#{File.dirname(__FILE__)}/quotes.db"
+      db = "sqlite3://#{File.dirname(__FILE__)}/quotes.db" # Doesn't work...
       db = "sqlite3:///Users/wmoore/Source/Quotes/backend/quotes.db"
       puts "Using db at #{db}"
       DataMapper.setup(:default, db)
     end
 
-    helpers do
-      include Rack::Utils
-      alias_method :h, :escape_html
-    end
-
     get '/' do
-      # quotes = Quote.all(:limit => 10)
       @quotes = Quote.all(:order => [:created_at.desc], :limit => 10)
       @users = User.all
       mustache :index
-      # erb :index, :locals => { :quotes => quotes }
     end
 
     get '/quotes' do
-      "all quotes paginated".to_json
+      "all quotes paginated"
     end
 
-    get '/users/:name/quotes' do |username|
-      "Quotes for #{username}".to_json
+    get '/users/:name' do |username|
+      @user = User.first(:username => username)
+      return not_found unless @user
+      @quotes = Quote.all(:user => @user, :order => [:created_at.desc])
+      mustache :user
     end
 
     get '/stats' do

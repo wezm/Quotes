@@ -4,6 +4,8 @@ require 'sinatra/base'
 require 'dm-core'
 require 'mustache/sinatra'
 
+# require 'rack/openid'
+
 require 'models'
 
 module Quotes
@@ -32,16 +34,29 @@ module Quotes
     # enable :sessions
 
     configure :development do
-      db = "sqlite3://#{File.dirname(__FILE__)}/quotes.db" # Doesn't work...
-      db = "sqlite3:///Users/wmoore/Source/Quotes/quotes.db"
+      db = "sqlite3:///#{File.dirname(__FILE__)}/quotes.db" # Doesn't work...
+      # db = "sqlite3:///Users/wmoore/Source/Quotes/quotes.db"
       puts "Using db at #{db}"
       DataMapper.setup(:default, db)
+    end
+
+    helpers do
+      def logged_in?
+        false
+      end
     end
 
     get '/' do
       @quotes = Quote.all(:order => [:created_at.desc], :limit => 10)
       @users = User.all
       mustache :index
+    end
+
+    get '/login' do
+    end
+
+    post '/login' do
+      
     end
 
     get '/quotes' do

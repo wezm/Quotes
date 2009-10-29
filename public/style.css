@@ -1,0 +1,33 @@
+/* Font stacks from: http://www.smashingmagazine.com/2009/09/22/complete-guide-to-css-font-stacks/ */
+body {
+  font-family: Constantia, "Lucida Bright", Lucidabright, "Lucida Serif", Lucida, "DejaVu Serif", "Bitstream Vera Serif", "Liberation Serif", Georgia, serif;
+}
+h1,h2,h3,h4,h5,h6 {
+  font-family: Frutiger, "Frutiger Linotype", Univers, Calibri, "Gill Sans", "Gill Sans MT", "Myriad Pro", Myriad, "DejaVu Sans Condensed", "Liberation Sans", "Nimbus Sans L", Tahoma, Geneva, "Helvetica Neue", Helvetica, Arial, sans-serif;
+  clear: both;
+}
+blockquote {
+  border-left: 1px solid #ccc;
+  padding-left: 1em;
+  margin-left: 1em;
+}
+blockquote p {
+  color: #eee;
+  margin: 0.5em 0;
+}
+
+.user {
+  float: left;
+  padding: 0.5em;
+  text-align: center;
+  display: block;
+}
+.user:hover {
+  background: #ccc;
+}
+.user img {
+  display: block;
+  padding: 0 1em;
+}
+.user span.username {
+}

@@ -10,6 +10,8 @@ module Quotes
   class App < Sinatra::Base
     register Mustache::Sinatra
 
+    set :app_file, __FILE__
+
     # Should be the path to your .mustache template files.
     set :views, "templates"
 
@@ -26,11 +28,12 @@ module Quotes
     # we'd want to do `set :namespace, Hurl::App`
     set :namespace, Quotes
 
-    enable :sessions
+    enable :static
+    # enable :sessions
 
     configure :development do
       db = "sqlite3://#{File.dirname(__FILE__)}/quotes.db" # Doesn't work...
-      db = "sqlite3:///Users/wmoore/Source/Quotes/backend/quotes.db"
+      db = "sqlite3:///Users/wmoore/Source/Quotes/quotes.db"
       puts "Using db at #{db}"
       DataMapper.setup(:default, db)
     end

@@ -4,7 +4,7 @@ require 'sinatra/base'
 require 'dm-core'
 require 'mustache/sinatra'
 
-require 'models'
+require 'models/models'
 
 module Quotes
   class App < Sinatra::Base

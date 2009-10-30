@@ -4,7 +4,7 @@ require 'jcode'
 require 'rubygems'
 require 'dm-core'
 require 'ftools'
-require 'models'
+require 'models/models'
 
 # Check command line args
 if ARGV.length < 2 then

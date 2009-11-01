@@ -31,3 +31,9 @@ blockquote p {
 }
 .user span.username {
 }
+
+/* Forms */
+.field label {
+  font-weight: bold;
+  display: block;
+}

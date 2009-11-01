@@ -1,10 +1,13 @@
 require 'rubygems'
 
 require 'sinatra/base'
+
 require 'dm-core'
+
 require 'mustache/sinatra'
 
-require 'models/models'
+require 'models/user'
+require 'models/quote'
 
 module Quotes
   class App < Sinatra::Base
@@ -55,8 +58,13 @@ module Quotes
       mustache :user
     end
 
-    get '/stats' do
-      mustache :stats
+    get '/login' do
+      mustache :login
     end
+
+    post '/login' do
+      
+    end
+
   end
 end

@@ -16,6 +16,7 @@ Install/Run
 You will need the following gems:
 
 * dm-core
+* dm-validations
 * do_sqlite3
 * sinatra
 * mustache

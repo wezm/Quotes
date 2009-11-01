@@ -1,3 +1,4 @@
+require 'dm-core'
 require 'dm-validations'
 
 class User
@@ -27,7 +28,7 @@ class User
   def password=(keyphrase)
     @password = keyphrase
     self.salt = User.random_string(10) if !self.salt
-    self.hashed_password = self.digest(@password, self.salt)
+    self.password_hash = User.digest(@password, self.salt)
   end
 
   def self.authenticate(username, keyphrase)
@@ -39,7 +40,7 @@ class User
   protected
   
   def self.digest(keyphrase, salt)
-    Digest::SHA1.hexdigest(pass+salt)
+    Digest::SHA1.hexdigest(keyphrase + salt)
   end
 
   def self.random_string(len)

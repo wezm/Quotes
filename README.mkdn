@@ -20,6 +20,7 @@ You will need the following gems:
 * do_sqlite3
 * sinatra
 * mustache
+* rack-flash
 
 Optional but handy for development:
 

@@ -5,12 +5,15 @@ require 'sinatra/base'
 require 'dm-core'
 
 require 'mustache/sinatra'
+require 'rack-flash'
 
 require 'models/user'
 require 'models/quote'
 
 module Quotes
   class App < Sinatra::Base
+    enable :sessions
+    use Rack::Flash
     register Mustache::Sinatra
 
     set :app_file, __FILE__
@@ -32,7 +35,6 @@ module Quotes
     set :namespace, Quotes
 
     enable :static
-    # enable :sessions
 
     configure :development do
       db = "sqlite3://#{File.dirname(__FILE__)}/quotes.db" # Doesn't work...
@@ -41,17 +43,32 @@ module Quotes
       DataMapper.setup(:default, db)
     end
 
+    helpers do
+      def login_required
+        if session[:user]
+          return true
+        else
+          session[:return_to] = request.fullpath
+          redirect '/login'
+          return false
+        end
+      end
+    end
+
     get '/' do
+      login_required
       @quotes = Quote.all(:order => [:created_at.desc], :limit => 10)
       @users = User.all
       mustache :index
     end
 
     get '/quotes' do
+      login_required
       "all quotes paginated"
     end
 
     get '/users/:name' do |username|
+      login_required
       @user = User.first(:username => username)
       return not_found unless @user
       @quotes = Quote.all(:user => @user, :order => [:created_at.desc])
@@ -63,7 +80,13 @@ module Quotes
     end
 
     post '/login' do
-      
+      if user = User.authenticate(params[:username], params[:password])
+        session[:user] = user.id
+        redirect '/'
+      else
+        flash[:error] = "Invalid username or password"
+        redirect '/login'
+      end
     end
 
   end

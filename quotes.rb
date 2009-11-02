@@ -55,6 +55,10 @@ module Quotes
       end
     end
 
+    before do
+      @flash = flash[:message]
+    end
+
     get '/' do
       login_required
       @quotes = Quote.all(:order => [:created_at.desc], :limit => 10)
@@ -76,15 +80,17 @@ module Quotes
     end
 
     get '/login' do
+      @title = 'Login'
       mustache :login
     end
 
     post '/login' do
       if user = User.authenticate(params[:username], params[:password])
         session[:user] = user.id
+        flash[:message] = "You are now logged in"
         redirect '/'
       else
-        flash[:error] = "Invalid username or password"
+        flash[:message] = "Invalid username or password"
         redirect '/login'
       end
     end

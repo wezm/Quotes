@@ -12,8 +12,11 @@
     <div id="header">
       <h1>Quotes</h1>
 
+      {{#flash_message}}
       <div id="flash">
+        {{message}}
       </div>
+      {{/flash_message}}
 
       <ul id="profile-menu">
         <li><a href="/users/fixme">Profile</a></li>

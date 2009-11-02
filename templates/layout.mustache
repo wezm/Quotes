@@ -33,24 +33,12 @@
         <li><a href="/logout">Logout</a></li>
       </ul>
     </div>
-    {{#sidebar}}
-    <div class="span-4">
-      <h2>Contributors</h2>
-
-      {{#users}}
-        <a class="user" href="{{user_path}}">
-          <img src="{{avatar}}" alt="{{name}}'s avatar" />
-          <span class="username">{{name}}</span>
-        </a>
-      {{/users}}
-    </div>
-    {{/sidebar}}
-    <div class="span-20 last">
+    <div class="span-24">
       {{{yield}}}
     </div>
-    <div class="span-24">
+    <!-- <div class="span-24">
       Footer
-    </div>
+    </div> -->
   </div>
 </body>
 </html>

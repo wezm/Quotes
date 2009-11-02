@@ -9,7 +9,7 @@ class User
   property :firstname, String, :nullable => false
   property :surname, String, :nullable => false
   property :password_hash, String, :nullable => false
-  property :salt, String, :nullable => false
+  property :salt, String, :default => ''
   property :email, String, :default => 'user@example.com', :format => :email_address
   property :last_posted, DateTime, :nullable => true
   property :favourite_quote_id, Integer, :nullable => true
@@ -27,7 +27,7 @@ class User
  
   def password=(keyphrase)
     @password = keyphrase
-    self.salt = User.random_string(10) if !self.salt
+    self.salt = User.random_string(10) if self.salt.blank?
     self.password_hash = User.digest(@password, self.salt)
   end
 

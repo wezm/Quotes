@@ -81,6 +81,7 @@ module Quotes
 
     get '/login' do
       @title = 'Login'
+      @sidebar = false
       mustache :login
     end
 

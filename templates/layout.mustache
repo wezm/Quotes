@@ -1,28 +1,56 @@
-<!DOCTYPE html>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html>
-  <head>
-    <title>
-      {{title}}
-    </title>
-    <link href="/style.css" media="screen" rel="stylesheet"/>
-    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.3.2/jquery.min.js"></script>
-    <script src="/script.js"></script>
-  </head>
-  <body>
-    <div id="header">
-      <h1>Quotes</h1>
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <title>
+    {{title}}
+  </title>
+  <link rel="stylesheet" href="/css/blueprint/screen.css" type="text/css" media="screen, projection" />
+  <link rel="stylesheet" href="/css/blueprint/print.css" type="text/css" media="print" />
+  <!--[if lt IE 8]>
+  <link rel="stylesheet" href="/css/blueprint/ie.css" type="text/css" media="screen, projection" />
+  <![endif]-->
+  <link rel="stylesheet" href="/css/style.css" type="text/css" media="screen, projection" />
+
+  <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.3.2/jquery.min.js"></script>
+  <script src="/js/script.js"></script>
+</head>
+<body>
+  <div class="container">
+    <div class="span-20">
+      <h1>Quotes Page</h1>
 
       {{#flash_message}}
-      <div id="flash">
+      <div id="flash" class="success">
         {{message}}
       </div>
       {{/flash_message}}
-
+    </div>
+    <div class="span-4 last">
       <ul id="profile-menu">
         <li><a href="/users/fixme">Profile</a></li>
         <li><a href="/logout">Logout</a></li>
       </ul>
     </div>
-    {{{yield}}}
-  </body>
+    {{#sidebar}}
+    <div class="span-4">
+      <h2>Contributors</h2>
+
+      {{#users}}
+        <a class="user" href="{{user_path}}">
+          <img src="{{avatar}}" alt="{{name}}'s avatar" />
+          <span class="username">{{name}}</span>
+        </a>
+      {{/users}}
+    </div>
+    {{/sidebar}}
+    <div class="span-20 last">
+      {{{yield}}}
+    </div>
+    <div class="span-24">
+      Footer
+    </div>
+  </div>
+</body>
 </html>

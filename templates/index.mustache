@@ -1,16 +1,7 @@
-<h2>People</h2>
-
-{{#users}}
-  <a class="user" href="{{user_path}}">
-    <img src="{{avatar}}" alt="{{name}}'s avatar" />
-    <span class="username">{{name}}</span>
-  </a>
-{{/users}}
-
 <h2>Recent Quotes</h2>
 {{#quotes}}
-  <blockquote cite="/path/to/user">
-    <p>{{body}}</p>
-    &mdash; {{quotee}}
-  </blockquote>
+<blockquote cite="/path/to/user">
+  <p><span class="left quote">&ldquo;</span>{{body}}<span class="right quote">&rdquo;</span></p>
+  &mdash; {{quotee}}
+</blockquote>
 {{/quotes}}

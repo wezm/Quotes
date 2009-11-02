@@ -4,32 +4,41 @@ body {
 }
 h1,h2,h3,h4,h5,h6 {
   font-family: Frutiger, "Frutiger Linotype", Univers, Calibri, "Gill Sans", "Gill Sans MT", "Myriad Pro", Myriad, "DejaVu Sans Condensed", "Liberation Sans", "Nimbus Sans L", Tahoma, Geneva, "Helvetica Neue", Helvetica, Arial, sans-serif;
-  clear: both;
 }
 blockquote {
-  border-left: 1px solid #ccc;
-  padding-left: 1em;
-  margin-left: 1em;
+  color: #ccc;
 }
 blockquote p {
-  color: #eee;
-  margin: 0.5em 0;
+  color: #555;
+  margin: 0;
+  font-size: 18pt;
+  line-height: 1.2;
+}
+blockquote span.quote {
+}
+blockquote span.left {
+}
+blockquote span.right {
 }
 
 .user {
-  float: left;
-  padding: 0.5em;
   text-align: center;
   display: block;
+  width: 10em;
 }
 .user:hover {
   background: #ccc;
 }
 .user img {
   display: block;
-  padding: 0 1em;
 }
 .user span.username {
+}
+
+/* Sidebar */
+#sidebar {
+  float: left;
+  width: 10em;
 }
 
 /* Forms */

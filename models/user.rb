@@ -32,7 +32,7 @@ class User
   end
 
   def self.authenticate(username, keyphrase)
-    current_user = get(:username => username)
+    current_user = first(:username => username)
     return nil if current_user.nil?
     User.digest(keyphrase, current_user.salt) == current_user.password_hash ? current_user : nil
   end

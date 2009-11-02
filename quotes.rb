@@ -87,12 +87,17 @@ module Quotes
     post '/login' do
       if user = User.authenticate(params[:username], params[:password])
         session[:user] = user.id
-        flash[:message] = "You are now logged in"
         redirect '/'
       else
         flash[:message] = "Invalid username or password"
         redirect '/login'
       end
+    end
+
+    get '/logout' do
+      session.delete(:user)
+      flash[:message] = 'You have been logged out'
+      redirect '/login'
     end
 
   end

@@ -32,6 +32,10 @@ module Quotes
           end
         end
 
+        def pager
+          @quotes.pager.to_html('/')
+        end
+
       end
 
     end

@@ -21,12 +21,13 @@ You will need the following gems:
 * sinatra
 * mustache
 * rack-flash
+* dm-pager
 
 Optional but handy for development:
 
 * shotgun
 
-__Note:__ mustache needs you to have previously setup [Gemcutter](http://gemcutter.org/) as a gem source.
+__Note:__ mustache and dm-pager require that you have previously setup [Gemcutter](http://gemcutter.org/) as a gem source.
 
 ### Run ###
 

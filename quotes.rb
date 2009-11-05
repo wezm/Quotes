@@ -3,6 +3,7 @@ require 'rubygems'
 require 'sinatra/base'
 
 require 'dm-core'
+require 'dm-pager'
 
 require 'mustache/sinatra'
 require 'rack-flash'
@@ -61,7 +62,7 @@ module Quotes
 
     get '/' do
       login_required
-      @quotes = Quote.all(:order => [:created_at.desc], :limit => 10)
+      @quotes = Quote.page(params[:page], :per_page => 10, :order => [:created_at.desc])
       @users = User.all
       mustache :index
     end

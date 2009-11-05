@@ -58,6 +58,7 @@ module Quotes
 
     before do
       @flash = flash[:message]
+      @user = User.get(session[:user])
     end
 
     get '/' do

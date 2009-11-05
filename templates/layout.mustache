@@ -22,12 +22,16 @@
       </div>
       {{/flash_message}}
     </div>
+
+    {{#user}}
     <div>
       <ul id="profile-menu">
-        <li><a href="/users/fixme">Profile</a></li>
+        <li><a href="{{path}}">Profile</a></li>
         <li><a href="/logout">Logout</a></li>
       </ul>
     </div>
+    {{/user}}
+
     <div>
       {{{yield}}}
     </div>

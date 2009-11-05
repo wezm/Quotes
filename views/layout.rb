@@ -13,6 +13,11 @@ module Quotes
       def sidebar
         @sidebar || true
       end
+
+      def user
+        return false unless @user
+        { :path => "/users/#{@user.username}" }
+      end
     end
   end
 end

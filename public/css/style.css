@@ -2,13 +2,15 @@
 body {
   font-family: Constantia, "Lucida Bright", Lucidabright, "Lucida Serif", Lucida, "DejaVu Serif", "Bitstream Vera Serif", "Liberation Serif", Georgia, serif;
 }
-h1,h2,h3,h4,h5,h6 {
+h1,h2,h3,h4,h5,h6,ul.pager {
   font-family: Frutiger, "Frutiger Linotype", Univers, Calibri, "Gill Sans", "Gill Sans MT", "Myriad Pro", Myriad, "DejaVu Sans Condensed", "Liberation Sans", "Nimbus Sans L", Tahoma, Geneva, "Helvetica Neue", Helvetica, Arial, sans-serif;
 }
 
 div.quote-list {
   clear: left;
 }
+
+/* Quotes */
 blockquote {
   color: #aaa;
   font-size: small;
@@ -27,6 +29,15 @@ blockquote span.left {
 blockquote span.right {
 }
 
+/* Links */
+a {
+  text-decoration: none;
+}
+a:hover {
+  text-decoration: underline;
+}
+
+
 .user {
   float: left;
   padding: 0.5em;
@@ -43,10 +54,21 @@ blockquote span.right {
 .user span.username {
 }
 
-/* Sidebar */
-#sidebar {
-  float: left;
-  width: 10em;
+/* Profile menu */
+#profile-menu {
+  list-style: none;
+}
+#profile-menu li {
+  display: inline;
+}
+
+/* Pagination */
+ul.pager {
+  list-style: none;
+  text-align: center;
+}
+ul.pager li {
+  display: inline;
 }
 
 /* Forms */
@@ -54,3 +76,15 @@ blockquote span.right {
   font-weight: bold;
   display: block;
 }
+
+/* Success, notice and error boxes */
+.error,
+.notice,
+.success    { padding: .8em; margin-bottom: 1em; border: 2px solid #ddd; }
+
+.error      { background: #FBE3E4; color: #8a1f11; border-color: #FBC2C4; }
+.notice     { background: #FFF6BF; color: #514721; border-color: #FFD324; }
+.success    { background: #E6EFC2; color: #264409; border-color: #C6D880; }
+.error a    { color: #8a1f11; }
+.notice a   { color: #514721; }
+.success a  { color: #264409; }

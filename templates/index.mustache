@@ -1,18 +1,22 @@
-<h1>Quotes</h1>
+<div>
+  <h2>Contributors</h2>
 
-<h2>People</h2>
-
-{{#users}}
+  {{#users}}
   <a class="user" href="{{user_path}}">
     <img src="{{avatar}}" alt="{{name}}'s avatar" />
     <span class="username">{{name}}</span>
   </a>
-{{/users}}
+  {{/users}}
+</div>
 
-<h2>Recent Quotes</h2>
-{{#quotes}}
+<div class="quote-list">
+  <h2>Recent Quotes</h2>
+  {{#quotes}}
   <blockquote cite="/path/to/user">
-    <p>{{body}}</p>
-    &mdash; {{quotee}}
+    <p><span class="left quote">&ldquo;</span>{{body}}<span class="right quote">&rdquo;</span></p>
+    &mdash; {{quotee}}{{#created_at}}, {{date}}{{/created_at}}
   </blockquote>
-{{/quotes}}
+  {{/quotes}}
+</div>
+
+{{{pager}}}

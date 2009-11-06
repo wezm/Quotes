@@ -1,4 +1,12 @@
-<h1>{{username}}'s Quotes</h1>
+<h2>{{username}}</h2>
+<img src="{{avatar}}" alt="{{name}}'s avatar" />
+
+<div class="vcard">
+  <div class="field">Name: <span class="fn">{{name}}</span></div>
+  <div class="field">Email: <span class="email">{{email}}</span></div>
+</div>
+
+<h3>Quotes</h3>
 
 {{#quotes}}
   <blockquote cite="/path/to/user">

@@ -18,9 +18,12 @@ __Note:__ My development environment for this app was initially ruby 1.8.6 but h
 You will need the following gems:
 
 * dm-core
+* dm-validations
 * do_sqlite3
 * sinatra
 * mustache
+* rack-flash
+* dm-pager
 
 Optional but handy for development:
 
@@ -31,7 +34,7 @@ For deployment:
 * rack
 * thin
 
-__Note:__ mustache needs you to have previously setup [Gemcutter](http://gemcutter.org/) as a gem source.
+__Note:__ mustache and dm-pager require that you have previously setup [Gemcutter](http://gemcutter.org/) as a gem source.
 
 ### Run ###
 

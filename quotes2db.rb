@@ -4,7 +4,8 @@ require 'jcode'
 require 'rubygems'
 require 'dm-core'
 require 'ftools'
-require 'models'
+
+%w(user quote rating).each { |model| require "models/#{model}" }
 
 # Check command line args
 if ARGV.length < 2 then
@@ -30,7 +31,7 @@ def add_profile(user, profile_file)
 
     profile = User.new
     profile.username = user
-    profile.password = profile_lines.shift.chomp
+    profile.password_hash = profile_lines.shift.chomp
     profile.firstname = profile_lines.shift.chomp
     profile.surname = profile_lines.shift.chomp
     last_posted = profile_lines.shift.to_i
@@ -48,6 +49,9 @@ def add_profile(user, profile_file)
       puts "Inserted profile for #{user}"
     else
       puts "Error saving profile for #{user}"
+      profile.errors.each do |e|
+        puts "- #{e}"
+      end
     end
 end
 

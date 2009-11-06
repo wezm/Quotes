@@ -8,6 +8,9 @@ require 'dm-pager'
 require 'mustache/sinatra'
 require 'rack-flash'
 
+require 'yaml'
+require 'pathname'
+
 require 'models/user'
 require 'models/quote'
 
@@ -37,11 +40,17 @@ module Quotes
 
     enable :static
 
-    configure :development do
-      db = "sqlite3://#{File.dirname(__FILE__)}/quotes.db" # Doesn't work...
-      db = "sqlite3:///Users/wmoore/Source/Quotes/quotes.db"
+    configure do
+      # Load config
+      basepath = Pathname(__FILE__).dirname
+      config_file = basepath + 'config.yml'
+      unless config_file.exist?
+        raise 'You need to create a config.yml, see config.yml.example.'
+      end
+      config = YAML.load_file(config_file)[environment]
+      db = "sqlite3://#{basepath.join(config[:database]).realpath}"
       puts "Using db at #{db}"
-      DataMapper.setup(:default, db)
+      DataMapper.setup(:default, db.to_s)
     end
 
     helpers do
@@ -66,11 +75,6 @@ module Quotes
       @quotes = Quote.page(params[:page], :per_page => 10, :order => [:created_at.desc])
       @users = User.all
       mustache :index
-    end
-
-    get '/quotes' do
-      login_required
-      "all quotes paginated"
     end
 
     get '/users/:name' do |username|

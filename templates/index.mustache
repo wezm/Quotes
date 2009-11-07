@@ -12,9 +12,9 @@
 <div class="quote-list">
   <h2>Recent Quotes</h2>
   {{#quotes}}
-  <blockquote cite="/path/to/user">
+  <blockquote cite="/users/{{quotee}}">
     <p><span class="left quote">&ldquo;</span>{{body}}<span class="right quote">&rdquo;</span></p>
-    &mdash; {{quotee}}{{#created_at}}, {{date}}{{/created_at}}
+    &mdash; <a href="/users/{{quotee}}" class="username">{{quotee}}</a>{{#created_at}}, {{date}}{{/created_at}}
   </blockquote>
   {{/quotes}}
 </div>

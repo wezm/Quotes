@@ -1,42 +1,54 @@
 /* Font stacks from: http://www.smashingmagazine.com/2009/09/22/complete-guide-to-css-font-stacks/ */
 body {
   font-family: Constantia, "Lucida Bright", Lucidabright, "Lucida Serif", Lucida, "DejaVu Serif", "Bitstream Vera Serif", "Liberation Serif", Georgia, serif;
+  padding: 0;
+  margin: 0 1em;
+  position: relative;
 }
-h1,h2,h3,h4,h5,h6,ul.pager {
+h1,h2,h3,h4,h5,h6,ul.pager,#profile-menu {
   font-family: Frutiger, "Frutiger Linotype", Univers, Calibri, "Gill Sans", "Gill Sans MT", "Myriad Pro", Myriad, "DejaVu Sans Condensed", "Liberation Sans", "Nimbus Sans L", Tahoma, Geneva, "Helvetica Neue", Helvetica, Arial, sans-serif;
+}
+h1,h2,h3,h4,h5,h6 {
+  margin: 0.75em 0 0.25em 0;
 }
 
 div.quote-list {
   clear: left;
+  padding-top: 1px;
 }
 
 /* Quotes */
 blockquote {
   color: #aaa;
   font-size: small;
-  margin-left: 1.5em;
+  margin: 1em 1em 1.75em 1.5em;
 }
 blockquote p {
   color: #555;
   margin: 0;
-  font-size: 18pt;
+  font-size: 24px;
   line-height: 1.2;
 }
 blockquote span.quote {
 }
 blockquote span.left {
+  float: left;
+  margin-left: -0.45em;
 }
 blockquote span.right {
 }
 
 /* Links */
 a {
+  color: #559;
   text-decoration: none;
+}
+a:visited {
+  color: #539;
 }
 a:hover {
   text-decoration: underline;
 }
-
 
 .user {
   float: left;
@@ -57,6 +69,9 @@ a:hover {
 /* Profile menu */
 #profile-menu {
   list-style: none;
+  position: absolute;
+  top: 0;
+  right: 0;
 }
 #profile-menu li {
   display: inline;

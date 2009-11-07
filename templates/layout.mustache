@@ -12,27 +12,23 @@
   <script src="/js/script.js"></script>
 </head>
 <body>
-  <div class="container">
-    <div>
-      <h1>Quotes Page</h1>
+  <h1>Quotes Page</h1>
 
-      {{#flash_message}}
-      <div id="flash" class="success">
-        {{message}}
-      </div>
-      {{/flash_message}}
-    </div>
+  {{#user}}
+  <ul id="profile-menu">
+    <li><a href="{{path}}">Profile</a></li>
+    <li><a href="/logout">Logout</a></li>
+  </ul>
+  {{/user}}
 
-    {{#user}}
-    <ul id="profile-menu">
-      <li><a href="{{path}}">Profile</a></li>
-      <li><a href="/logout">Logout</a></li>
-    </ul>
-    {{/user}}
+  {{#flash_message}}
+  <div id="flash" class="success">
+    {{message}}
+  </div>
+  {{/flash_message}}
 
-    <div>
-      {{{yield}}}
-    </div>
+  <div id="content">
+    {{{yield}}}
   </div>
 </body>
 </html>

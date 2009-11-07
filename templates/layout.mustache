@@ -12,22 +12,22 @@
   <script src="/js/script.js"></script>
 </head>
 <body>
-  <h1>Quotes Page</h1>
+  <div id="header">
+    <h1><a href="/">Quotes Page</a></h1>
 
-  {{#user}}
-  <ul id="profile-menu">
-    <li><a href="{{path}}">Profile</a></li>
-    <li><a href="/logout">Logout</a></li>
-  </ul>
-  {{/user}}
-
-  {{#flash_message}}
-  <div id="flash" class="success">
-    {{message}}
+    {{#user}}
+    <ul id="profile-menu">
+      <li><a href="{{path}}">Profile</a></li><li><a href="/logout">Logout</a></li>
+    </ul>
+    {{/user}}
   </div>
-  {{/flash_message}}
-
   <div id="content">
+    {{#flash_message}}
+    <div id="flash" class="success">
+      {{message}}
+    </div>
+    {{/flash_message}}
+
     {{{yield}}}
   </div>
 </body>

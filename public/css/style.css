@@ -2,14 +2,46 @@
 body {
   font-family: Constantia, "Lucida Bright", Lucidabright, "Lucida Serif", Lucida, "DejaVu Serif", "Bitstream Vera Serif", "Liberation Serif", Georgia, serif;
   padding: 0;
-  margin: 0 1em;
-  position: relative;
+  margin: 0;
 }
+
+/* Links */
+a {
+  color: #559;
+  text-decoration: none;
+}
+a:visited {
+  color: #539;
+}
+a:hover {
+  text-decoration: underline;
+}
+a img {
+  border: 0;
+}
+
+/* Headings */
 h1,h2,h3,h4,h5,h6,ul.pager,#profile-menu {
   font-family: Frutiger, "Frutiger Linotype", Univers, Calibri, "Gill Sans", "Gill Sans MT", "Myriad Pro", Myriad, "DejaVu Sans Condensed", "Liberation Sans", "Nimbus Sans L", Tahoma, Geneva, "Helvetica Neue", Helvetica, Arial, sans-serif;
 }
 h1,h2,h3,h4,h5,h6 {
   margin: 0.75em 0 0.25em 0;
+}
+h1 {
+  margin: 0;
+}
+h1 a, h1 a:visited, h1 a:hover {
+  color: black;
+  text-decoration: none;
+}
+
+#header {
+  background-color: rgb(189, 198, 212);
+  padding: 1em;
+  position: relative;
+}
+#content {
+  padding: 0 1em;
 }
 
 div.quote-list {
@@ -38,18 +70,6 @@ blockquote span.left {
 blockquote span.right {
 }
 
-/* Links */
-a {
-  color: #559;
-  text-decoration: none;
-}
-a:visited {
-  color: #539;
-}
-a:hover {
-  text-decoration: underline;
-}
-
 .user {
   float: left;
   padding: 0.5em;
@@ -57,7 +77,10 @@ a:hover {
   display: block;
 }
 .user:hover {
-  background: #ccc;
+  background: #eee;
+  -moz-border-radius: 5px;
+  -webkit-border-radius: 5px;
+  border-radius: 5px;
 }
 .user img {
   display: block;
@@ -72,9 +95,21 @@ a:hover {
   position: absolute;
   top: 0;
   right: 0;
+  padding: 0.5em;
+  margin: 1em;
+  background-color: #eee;
+  -moz-border-radius: 5px;
+  -webkit-border-radius: 5px;
+  border-radius: 5px;
 }
 #profile-menu li {
   display: inline;
+  padding: 0 0.5em;
+  margin: 0;
+  border-right: 2px solid #aaa;
+}
+#profile-menu li:last-child {
+  border-right: 0;
 }
 
 /* Pagination */

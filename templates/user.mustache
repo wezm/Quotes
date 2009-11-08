@@ -6,10 +6,16 @@
   <div class="field">Email: <span class="email">{{email}}</span></div>
 </div>
 
-<h3>Quotes</h3>
-
-{{#quotes}}
-  <blockquote cite="/path/to/user">
-    <p>{{body}}</p>
-  </blockquote>
-{{/quotes}}
+<div class="quote-list">
+  <h3>Quotes</h3>
+  <ul>
+    {{#quotes}}
+    <li>
+      <blockquote cite="/users/{{quotee}}">
+        <p><span class="left quote">&ldquo;</span>{{body}}<span class="right quote">&rdquo;</span></p>
+        &mdash; <a href="/users/{{quotee}}" class="username">{{quotee}}</a>{{#created_at}}, {{date}}{{/created_at}}
+      </blockquote>
+    </li>
+    {{/quotes}}
+  </ul>
+</div>

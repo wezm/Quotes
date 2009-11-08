@@ -1,4 +1,5 @@
 require 'gravatar_helpers'
+require 'quote_helpers'
 
 module Quotes
 
@@ -6,20 +7,10 @@ module Quotes
       
       class Index < Mustache
         include Quotes::GravatarHelpers
+        include Quotes::QuoteHelpers
 
         def initialize(ssl = false)
           @ssl = ssl
-        end
-
-        def quotes
-          @quotes.map do |q|
-            created = q.created_at ? { :date => q.created_at.strftime('%a %d %b %Y %I:%M %p') } : false
-            {
-              :body => q.quote_body,
-              :quotee => q.user.username,
-              :created_at => created,
-            }
-          end
         end
 
         def users

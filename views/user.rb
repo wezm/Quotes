@@ -1,4 +1,5 @@
 require 'gravatar_helpers'
+require 'quote_helpers'
 
 module Quotes
 
@@ -6,6 +7,7 @@ module Quotes
 
       class User < Mustache
         include Quotes::GravatarHelpers
+        include Quotes::QuoteHelpers
 
         def initialize(ssl = false)
           @ssl = ssl
@@ -25,14 +27,6 @@ module Quotes
 
         def email
           @user.email
-        end
-
-        def quotes
-          @quotes.map do |q|
-            {
-              :body => q.quote_body,
-            }
-          end
         end
       end
 

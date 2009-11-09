@@ -2,7 +2,7 @@ require 'md5'
 
 module Quotes
 
-  module GravatarHelpers
+  module ViewHelpers
     def gravatar(email, size = 80)
       gravatar_id = Digest::MD5.hexdigest(email.to_s.strip.downcase)
       gravatar_for_id(gravatar_id, size)
@@ -14,6 +14,17 @@ module Quotes
 
     def gravatar_host
       @ssl ? 'https://secure.gravatar.com' : 'http://www.gravatar.com'
+    end
+
+    def quotes
+      @quotes.map do |q|
+        created = q.created_at ? { :date => q.created_at.strftime('%a %d %b %Y %I:%M %p') } : false
+        {
+          :body => q.quote_body,
+          :quotee => q.user.username,
+          :created_at => created,
+        }
+      end
     end
   end
 

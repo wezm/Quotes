@@ -1,13 +1,11 @@
-require 'gravatar_helpers'
-require 'quote_helpers'
+require 'view_helpers'
 
 module Quotes
 
     module Views
 
       class User < Mustache
-        include Quotes::GravatarHelpers
-        include Quotes::QuoteHelpers
+        include Quotes::ViewHelpers
 
         def initialize(ssl = false)
           @ssl = ssl
@@ -27,6 +25,10 @@ module Quotes
 
         def email
           @user.email
+        end
+
+        def pager
+          @quotes.pager.to_html("/users/#{@user.username}")
         end
       end
 

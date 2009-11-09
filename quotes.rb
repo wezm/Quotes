@@ -80,8 +80,8 @@ module Quotes
     get '/users/:name' do |username|
       login_required
       @user = User.first(:username => username)
-      return not_found unless @user
-      @quotes = Quote.all(:user => @user, :order => [:created_at.desc])
+      not_found unless @user
+      @quotes = Quote.page(params[:page], :per_page => 20, :user => @user, :order => [:created_at.desc])
       mustache :user
     end
 

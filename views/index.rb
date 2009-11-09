@@ -1,13 +1,11 @@
-require 'gravatar_helpers'
-require 'quote_helpers'
+require 'view_helpers'
 
 module Quotes
 
     module Views
       
       class Index < Mustache
-        include Quotes::GravatarHelpers
-        include Quotes::QuoteHelpers
+        include Quotes::ViewHelpers
 
         def initialize(ssl = false)
           @ssl = ssl

@@ -11,16 +11,7 @@
 
 <div class="quote-list">
   <h2>Recent Quotes</h2>
-  <ul>
-    {{#quotes}}
-    <li>
-      <blockquote cite="/users/{{quotee}}">
-        <p><span class="left quote">&ldquo;</span>{{body}}<span class="right quote">&rdquo;</span></p>
-        &mdash; <a href="/users/{{quotee}}" class="username">{{quotee}}</a>{{#created_at}}, {{date}}{{/created_at}}
-      </blockquote>
-    </li>
-    {{/quotes}}
-  </ul>
+  {{<quotes_partial}}
 </div>
 
 {{{pager}}}

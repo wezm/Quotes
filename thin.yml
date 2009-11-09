@@ -1,7 +1,7 @@
 ---
   environment: production
   chdir: /Users/wmoore/Sites/quotes.wezm.net
-  address: 127.0.0.1
+  address: 0.0.0.0
   user: _www
   group: _www
   port: 8101

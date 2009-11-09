@@ -47,7 +47,7 @@ For development, using shotgun:
 
 Or with thin:
 
-    thin config.ru
+    thin -C thin.yml -R config.ru start
 
 ### Creating the Initial DB ###
 

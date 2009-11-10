@@ -14,6 +14,14 @@ module Quotes
         return false unless @user
         { :path => "/users/#{@user.username}" }
       end
+
+      def analytics
+        !!@analytics_id
+      end
+
+      def analytics_id
+        @analytics_id
+      end
     end
   end
 end

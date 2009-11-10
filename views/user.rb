@@ -27,6 +27,24 @@ module Quotes
           @user.email
         end
 
+        def include_quotee
+          false
+        end
+
+        def current_user
+          @user == @current_user
+        end
+
+        def quotes
+          @quotes.map do |q|
+            {
+              :body => q.quote_body,
+              :created_at => formatted_date(q.created_at),
+              :poster  => q.poster.username,
+            }
+          end
+        end
+
         def pager
           @quotes.pager.to_html("/users/#{@user.username}")
         end

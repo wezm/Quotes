@@ -21,6 +21,21 @@ module Quotes
           end
         end
 
+        def include_quotee
+          true
+        end
+
+        def quotes
+          @quotes.map do |q|
+            {
+              :body => q.quote_body,
+              :created_at => formatted_date(q.created_at),
+              :quotee => q.user.username,
+              :poster  => q.poster.username,
+            }
+          end
+        end
+
         def pager
           @quotes.pager.to_html('/')
         end

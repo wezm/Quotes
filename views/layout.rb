@@ -11,8 +11,8 @@ module Quotes
       end
 
       def user
-        return false unless @user
-        { :path => "/users/#{@user.username}" }
+        return false unless @current_user
+        { :path => "/users/#{@current_user.username}" }
       end
 
       def analytics

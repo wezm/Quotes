@@ -3,7 +3,9 @@
 
 <div class="vcard">
   <div class="field">Name: <span class="fn">{{name}}</span></div>
+  {{#current_user}}
   <div class="field">Email: <span class="email">{{email}}</span></div>
+  {{/current_user}}
 </div>
 
 <div class="quote-list">

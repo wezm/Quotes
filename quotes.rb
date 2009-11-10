@@ -69,7 +69,7 @@ module Quotes
 
     before do
       @flash = flash[:message]
-      @user = User.get(session[:user])
+      @current_user = User.get(session[:user])
 
       # This isn't very nice but is needed because the view can't access options
       @analytics_id = options.analytics_id

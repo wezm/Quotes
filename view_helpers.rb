@@ -16,15 +16,8 @@ module Quotes
       @ssl ? 'https://secure.gravatar.com' : 'http://www.gravatar.com'
     end
 
-    def quotes
-      @quotes.map do |q|
-        created = q.created_at ? { :date => q.created_at.strftime('%a %d %b %Y %I:%M %p') } : false
-        {
-          :body => q.quote_body,
-          :quotee => q.user.username,
-          :created_at => created,
-        }
-      end
+    def formatted_date(date)
+      date ? date.strftime('%a %d %b %Y %I:%M %p') : ''
     end
   end
 

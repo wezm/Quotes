@@ -51,6 +51,8 @@ module Quotes
       db = "sqlite3://#{basepath.join(config[:database]).realpath}"
       puts "Using db at #{db}"
       DataMapper.setup(:default, db.to_s)
+
+      set :analytics_id, config[:analytics_id]
     end
 
     helpers do
@@ -67,7 +69,10 @@ module Quotes
 
     before do
       @flash = flash[:message]
-      @user = User.get(session[:user])
+      @current_user = User.get(session[:user])
+
+      # This isn't very nice but is needed because the view can't access options
+      @analytics_id = options.analytics_id
     end
 
     get '/' do

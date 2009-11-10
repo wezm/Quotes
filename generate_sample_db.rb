@@ -88,6 +88,7 @@ quotes = [
 
 quotes.each do |q|
   quote = Quote.new(q)
+  quote.created_at = Time.now
   quote.save || raise("Error creating #{q[:body]}")
 end
 
@@ -95,14 +96,16 @@ end
 parent = Quote.new(
   :quote_body => "Parent for linked quote.",
   :user => User.first(:username => 'ckassulk'),
-  :poster => User.first(:username => 'dgusikow')
+  :poster => User.first(:username => 'dgusikow'),
+  :created_at => Time.now
 )
 parent.save || raise("Unable to save parent quote")
 linked = Quote.new(
   :quote_body => "In response to anther quote.",
   :user => User.first(:username => 'dgusikow'),
   :poster => User.first(:username => 'ckassulk'),
-  :parent_quote => parent
+  :parent_quote => parent,
+  :created_at => Time.now
 )
 linked.save || raise("Unable to save linked quote")
 

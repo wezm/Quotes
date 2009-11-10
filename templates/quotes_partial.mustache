@@ -1,12 +1,7 @@
 <ul>
   {{#quotes}}
   <li>
-    <blockquote cite="/users/{{quotee}}">
-      <p><span class="left quote">&ldquo;</span>{{body}}<span class="right quote">&rdquo;</span></p>
-      &mdash;
-      {{#include_quotee}}<a href="/users/{{quotee}}" class="username">{{quotee}}</a>, {{/include_quotee}}
-      posted by <a href="/users/{{poster}}" class="username">{{poster}}</a> {{created_at}}
-    </blockquote>
+    {{<quote_partial}}
   </li>
   {{/quotes}}
 </ul>

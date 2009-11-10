@@ -90,6 +90,13 @@ module Quotes
       mustache :user
     end
 
+    get '/quote/:id' do |quote_id|
+      login_required
+      @quote = Quote.get(quote_id)
+      not_found unless @quote
+      mustache :quote
+    end
+
     get '/login' do
       @title = 'Login'
       @sidebar = false

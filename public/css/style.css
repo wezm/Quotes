@@ -80,6 +80,13 @@ blockquote span.left {
 }
 blockquote span.right {
 }
+.quote-tools {
+  float: right;
+  display: none;
+}
+li:hover .quote-tools {
+  display: inline;
+}
 
 .user {
   float: left;

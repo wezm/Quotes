@@ -38,6 +38,7 @@ module Quotes
         def quotes
           @quotes.map do |q|
             {
+              :quote_id => q.id,
               :body => q.quote_body,
               :created_at => formatted_date(q.created_at),
               :poster  => q.poster.username,

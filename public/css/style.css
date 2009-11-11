@@ -87,6 +87,18 @@ blockquote span.right {
 li:hover .quote-tools {
   display: inline;
 }
+.quotee {
+  vertical-align: middle;
+  margin: 0.75em 0 0.25em 0;
+}
+.quotee img {
+  float: left;
+}
+.quotee h2 {
+  margin: 0;
+  padding: 0.25em 0 0 0.25em;
+  float: left;
+}
 
 .user {
   float: left;

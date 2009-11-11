@@ -11,8 +11,21 @@ module Quotes
           @ssl = ssl
         end
 
+        def quotes
+          {
+            :quote_id => @quote.id,
+            :body => @quote.quote_body,
+            :created_at => formatted_date(@quote.created_at),
+            :poster  => @quote.poster.username,
+          }
+        end
+
         def name
           [@quote.user.firstname, @quote.user.surname].join(' ')
+        end
+
+        def quotee
+          @quote.user.username
         end
 
         def avatar
@@ -21,22 +34,6 @@ module Quotes
 
         def include_quotee
           false
-        end
-
-        def body
-          @quote.quote_body
-        end
-
-        def created_at
-          formatted_date(@quote.created_at)
-        end
-
-        def poster
-          @quote.poster.username
-        end
-
-        def quotee
-          @quote.user.username
         end
       end
 

@@ -157,6 +157,23 @@ ul.pager li {
   display: block;
 }
 
+form.add.quote span.quote {
+  font-size: 24px;
+}
+form.add.quote span.left {
+  padding-right: 0.25em;
+}
+form.add.quote span.right {
+  padding-left: 0.25em;
+}
+input#quote-body {
+  width: 30em;
+  font-size: 18px;
+}
+form.add.quote label {
+  display: none;
+}
+
 /* Success, notice and error boxes */
 .error,
 .notice,

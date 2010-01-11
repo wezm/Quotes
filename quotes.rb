@@ -11,8 +11,7 @@ require 'rack-flash'
 require 'yaml'
 require 'pathname'
 
-require 'models/user'
-require 'models/quote'
+%w(user quote rating).each { |model| require "models/#{model}" }
 
 module Quotes
   class App < Sinatra::Base
@@ -95,6 +94,36 @@ module Quotes
       @quote = Quote.get(quote_id)
       not_found unless @quote
       mustache :quote
+    end
+
+    get '/quotes/new' do
+      login_required
+      @users = User.all
+      mustache :new_quote
+    end
+
+    post '/quotes' do
+      login_required
+
+      if user = User.first(:id => params[:user_id])
+        q = Quote.new(
+          :quote_body => params[:quote_body],
+          :poster => @current_user,
+          :created_at => Time.now,
+          :user => user
+        )
+
+        unless q.save
+          flash[:message] = "Error saving quote"
+          redirect '/quotes/new'
+        end
+
+        flash[:message] = "Quote added"
+        redirect "/quote/#{q.id}"
+      else
+        flash[:message] = "Invalid user"
+        redirect '/quotes/new'
+      end
     end
 
     get '/login' do

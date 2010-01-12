@@ -28,6 +28,10 @@ module Quotes
           @quote.user.username
         end
 
+        def quotee_path
+          "/users/#{quotee}"
+        end
+
         def avatar
           gravatar(@quote.user.email, 50)
         end

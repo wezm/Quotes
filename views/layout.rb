@@ -6,8 +6,13 @@ module Quotes
       end
       
       def flash_message
-        return false unless @flash
-        { :message => @flash }
+        return false unless @flash_message
+        { :message => @flash_message }
+      end
+
+      def flash_error
+        return false unless @flash_error
+        { :message => @flash_error }
       end
 
       def user

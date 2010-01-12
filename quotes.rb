@@ -67,7 +67,8 @@ module Quotes
     end
 
     before do
-      @flash = flash[:message]
+      @flash_message = flash[:message]
+      @flash_error = flash[:error]
       @current_user = User.get(session[:user])
 
       # This isn't very nice but is needed because the view can't access options
@@ -105,6 +106,11 @@ module Quotes
     post '/quotes' do
       login_required
 
+      if params[:quote_body].nil? || params[:quote_body] =~ /^\s*$/
+        flash[:error] = "Quote can't be blank"
+        return redirect '/quotes/new'
+      end
+
       if user = User.first(:id => params[:user_id])
         q = Quote.new(
           :quote_body => params[:quote_body],
@@ -114,14 +120,14 @@ module Quotes
         )
 
         unless q.save
-          flash[:message] = "Error saving quote"
+          flash[:error] = "Error saving quote"
           redirect '/quotes/new'
         end
 
         flash[:message] = "Quote added"
         redirect "/quote/#{q.id}"
       else
-        flash[:message] = "Invalid user"
+        flash[:error] = "Invalid user"
         redirect '/quotes/new'
       end
     end
@@ -137,7 +143,7 @@ module Quotes
         session[:user] = user.id
         redirect '/'
       else
-        flash[:message] = "Invalid username or password"
+        flash[:error] = "Invalid username or password"
         redirect '/login'
       end
     end

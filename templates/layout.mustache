@@ -25,6 +25,11 @@
     {{/user}}
   </div>
   <div id="content">
+    {{#flash_error}}
+    <div id="flash" class="error">
+      {{message}}
+    </div>
+    {{/flash_error}}
     {{#flash_message}}
     <div id="flash" class="success">
       {{message}}

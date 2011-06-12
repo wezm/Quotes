@@ -11,46 +11,25 @@ This app is the result of digging up those quote files, converting them to an SQ
 Install/Run
 -----------
 
-__Note:__ My development environment for this app was initially ruby 1.8.6 but has now switched to ruby 1.9.1 (on Mac OS X).
+__Note:__ My development environment for this app is ruby 1.9.2 (on Mac OS X).
 
-### Prerequisites ###
+Install the necessary gem via Bubdler:
 
-You will need the following gems:
-
-* dm-core
-* dm-validations
-* do_sqlite3
-* sinatra
-* mustache
-* rack-flash
-* dm-pager
-
-Optional but handy for development:
-
-* shotgun
-
-For deployment:
-
-* rack
-* thin
-
-__Note:__ mustache and dm-pager require that you have previously setup [Gemcutter](http://gemcutter.org/) as a gem source.
+    bundle install
 
 ### Run ###
 
-I intend to use [thin](http://code.macournoyer.com/thin/) proxied through a front-end
-[Cherokee](http://www.cherokee-project.com/) webserver.
-
 For development, using shotgun:
 
-    shotgun config.ru
+    bundle exec shotgun config.ru
 
 Or with thin:
 
-    thin -C thin.yml -R config.ru start
+    bundle exec thin -C thin.yml -R config.ru start
 
 ### Creating the Initial DB ###
 
-This is more for my own documentation. Nonetheless:
+This is mainly for my own documentation since it is to import from the old PHP
+app:
 
-    ruby quotes2db.rb quotes.db quotes/*.{profile,quotes}
+    bubdle exec ruby quotes2db.rb quotes.db quotes/*.{profile,quotes}

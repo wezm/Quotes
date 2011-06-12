@@ -1,4 +1,4 @@
-require 'view_helpers'
+require './view_helpers'
 
 module Quotes
 

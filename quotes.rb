@@ -11,7 +11,8 @@ require 'rack-flash'
 require 'yaml'
 require 'pathname'
 
-%w(user quote rating).each { |model| require "models/#{model}" }
+%w(user quote rating).each { |model| require "./models/#{model}" }
+Dir['./views/*.rb'].each { |view| require view }
 
 module Quotes
   class App < Sinatra::Base
@@ -21,12 +22,19 @@ module Quotes
 
     set :app_file, __FILE__
 
+    set :mustache, {
+      :namespace => Quotes,
+      :views     => 'views',
+      :templates => 'templates'
+    }
+
+
     # Should be the path to your .mustache template files.
-    set :views, "templates"
+    #set :views, "templates"
 
     # Should be the path to your .rb Mustache view files.
     # Only needed if different from the `views` setting
-    set :mustaches, "views"
+    #set :mustaches, "views"
 
     # This tells Mustache where to look for the Views module,
     # under which your View classes should live. By default it's

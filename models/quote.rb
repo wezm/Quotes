@@ -3,10 +3,10 @@ class Quote
 
   property :id, Serial
   property :quote_body, Text
-  property :user_id, Integer, :nullable => false
+  property :user_id, Integer, :required => true
   property :created_at, DateTime
-  property :poster_id, Integer, :nullable => false
-  property :parent_quote_id, Integer, :nullable => true
+  property :poster_id, Integer, :required => true
+  property :parent_quote_id, Integer, :required => false
 
   belongs_to :user
   belongs_to :poster, :model => 'User', :child_key => [ :poster_id ]

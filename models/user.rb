@@ -5,14 +5,14 @@ class User
   include DataMapper::Resource
   
   property :id, Serial
-  property :username, String, :nullable => false, :unique => true
-  property :firstname, String, :nullable => false
-  property :surname, String, :nullable => false
-  property :password_hash, String, :nullable => false
+  property :username, String, :required => true, :unique => true
+  property :firstname, String, :required => true
+  property :surname, String, :required => true
+  property :password_hash, String, :required => true
   property :salt, String, :default => ''
   property :email, String, :default => 'user@example.com', :format => :email_address
-  property :last_posted, DateTime, :nullable => true
-  property :favourite_quote_id, Integer, :nullable => true
+  property :last_posted, DateTime, :required => false
+  property :favourite_quote_id, Integer, :required => false
 
   belongs_to :favourite_quote, :model => 'Quote' #, :child_key => [ :fav]
 
@@ -21,9 +21,9 @@ class User
   #protected :id, :salt
   #doesn't behave correctly, I'm not even sure why I did this.
  
-  validates_present :password_confirmation, :unless => Proc.new { |t| t.password_hash }
-  validates_present :password, :unless => Proc.new { |t| t.password_hash }
-  validates_is_confirmed :password
+  validates_presence_of :password_confirmation, :unless => Proc.new { |t| t.password_hash }
+  validates_presence_of :password, :unless => Proc.new { |t| t.password_hash }
+  validates_confirmation_of :password
  
   def password=(keyphrase)
     @password = keyphrase

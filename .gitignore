@@ -3,3 +3,5 @@ frontend/*
 backend/*
 config.yml
 sample_quotes.db
+.bundle/*
+.rvmrc

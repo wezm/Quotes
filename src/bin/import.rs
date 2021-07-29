@@ -1,4 +1,3 @@
-use std::collections::HashMap;
 use std::ffi::OsStr;
 use std::fs;
 use std::fs::File;
@@ -35,8 +34,8 @@ pub struct User {
     username: String,
     first_name: String,
     last_name: String,
-    last_posted: u32,
-    favourite_quote: String,
+    last_posted: Option<u32>,
+    favourite_quote: Option<String>,
 }
 
 fn main() -> Result<()> {
@@ -53,7 +52,10 @@ fn main() -> Result<()> {
     let mut conn = Connection::open(&dbpath)?;
     migrate(&mut conn)?;
 
-    let users = read_users(&qbase)?;
+    // let mut insert_user = conn.prepare("INSERT INTO users (")?;
+    // let mut insert_quotes = conn.prepare("SELECT id, name, data FROM person")?;
+
+    let users = dbg!(read_users(&qbase)?);
     for user in &users {
         let user_quotes = read_quotes(&user.quotes_path())?;
 
@@ -89,9 +91,12 @@ fn read_profile(username: String, path: PathBuf) -> Result<User> {
     let _ = lines.next(); // password hash
     let first_name = lines.next().unwrap()?;
     let last_name = lines.next().unwrap()?;
-    let last_posted = lines.next().unwrap()?.parse()?;
+    let last_posted =
+        Some(lines.next().unwrap()?.parse()?)
+            .and_then(|time| if time == 0 { None } else { Some(time) });
     let _ = lines.next(); // unused
-    let favourite_quote = lines.next().unwrap()?;
+    let favourite_quote =
+        Some(lines.next().unwrap()?).and_then(|id| if id == "0" { None } else { Some(id) });
 
     Ok(User {
         path,

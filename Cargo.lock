@@ -854,6 +854,7 @@ dependencies = [
  "refinery",
  "rocket",
  "rocket_sync_db_pools",
+ "rusqlite",
 ]
 
 [[package]]

@@ -5,6 +5,7 @@ CREATE TABLE IF NOT EXISTS "quotes"
     "user_id"         INTEGER NOT NULL,
     "created_at"      TIMESTAMP,
     "poster_id"       INTEGER NOT NULL,
+    "rating"          INTEGER NOT NULL,
     "parent_quote_id" INTEGER
 );
 

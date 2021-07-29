@@ -124,6 +124,22 @@ impl User {
     fn quotes_path(&self) -> PathBuf {
         self.path.with_extension("quotes")
     }
+
+    fn favourite_quote(&self) -> Result<Option<(String, u32)>> {
+        self.favourite_quote
+            .as_ref()
+            .map(|raw| {
+                let username = raw
+                    .chars()
+                    .take_while(|ch| !('0'..='9').contains(ch))
+                    .collect::<String>();
+                raw[username.len()..]
+                    .parse()
+                    .map(|id| (username, id))
+                    .map_err(Error::from)
+            })
+            .transpose()
+    }
 }
 
 impl FromStr for Quote {
@@ -159,4 +175,25 @@ impl FromStr for Quote {
 fn exit_usage() -> ! {
     eprintln!("Usage: import path/to/quotes to/this/db.sqlite");
     std::process::exit(1);
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn favourite_quote() {
+        let user = User {
+            path: PathBuf::from("/home/wmoore/Documents/freeshell/wmoore/quotes/wmoore.profile"),
+            username: String::from("wmoore"),
+            first_name: String::from("Wesley"),
+            last_name: String::from("Moore"),
+            last_posted: Some(1070020512),
+            favourite_quote: Some(String::from("darnott184")),
+        };
+        assert_eq!(
+            user.favourite_quote().unwrap(),
+            Some((String::from("darnott"), 184))
+        );
+    }
 }

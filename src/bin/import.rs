@@ -1,3 +1,4 @@
+use std::collections::HashMap;
 use std::ffi::OsStr;
 use std::fs;
 use std::fs::File;
@@ -6,7 +7,7 @@ use std::path::{Path, PathBuf};
 use std::str::FromStr;
 
 use quotes::db::migrate;
-use rusqlite::Connection;
+use rusqlite::{params, Connection};
 
 type Error = Box<dyn std::error::Error + Send + Sync>;
 type Result<T> = std::result::Result<T, Error>;
@@ -15,7 +16,7 @@ type Result<T> = std::result::Result<T, Error>;
 pub struct Quote {
     quote: String,
     poster: String,
-    time: u64,
+    time: Option<u32>,
     ratings: String,
     reference: Option<String>,
 }
@@ -34,7 +35,7 @@ pub struct User {
     username: String,
     first_name: String,
     last_name: String,
-    last_posted: Option<u64>,
+    last_posted: Option<u32>,
     favourite_quote: Option<String>,
 }
 
@@ -52,17 +53,61 @@ fn main() -> Result<()> {
     let mut conn = Connection::open(&dbpath)?;
     migrate(&mut conn)?;
 
-    // let mut insert_user = conn.prepare("INSERT INTO users (")?;
-    // let mut insert_quotes = conn.prepare("SELECT id, name, data FROM person")?;
-
-    let users = dbg!(read_users(&qbase)?);
+    // Add users to the db
+    let users = read_users(&qbase)?;
+    let mut uid_map = HashMap::new();
+    let mut insert_user = conn.prepare("INSERT INTO users (username, firstname, surname, password_hash, email, last_posted) VALUES (?,?,?,?,?,?)")?;
     for user in &users {
+        // Insert the user into the db and get its id
+        let email = format!("{}@example.com", user.username);
+        let rowid = insert_user.insert(params![
+            user.username,
+            user.first_name,
+            user.last_name,
+            "*",
+            email,
+            user.last_posted
+        ])?;
+        println!("Inserted {} with rowid {}", user.username, rowid);
+        uid_map.insert(user.username.as_str(), rowid);
+    }
+
+    /*
+    quote: String,
+    poster: String,
+    time: u64,
+    ratings: String,
+    reference: Option<String>,
+
+    "quote_body"      TEXT,
+    "user_id"         INTEGER NOT NULL,
+    "created_at"      TIMESTAMP,
+    "poster_id"       INTEGER NOT NULL,
+    "rating"          INTEGER NOT NULL,
+    "parent_quote_id" INTEGER
+     */
+
+    // Add quotes to the db
+    let uid_map = uid_map; // drop mutability
+    let mut insert_quote = conn.prepare("INSERT INTO quotes (quote_body, user_id, created_at, poster_id, rating) VALUES (?,?,?,?,?)")?;
+    for user in &users {
+        let user_id = uid_map
+            .get(&user.username.as_str())
+            .ok_or_else(|| format!("unable to find id of user {}", user.username))?;
         let user_quotes = read_quotes(&user.quotes_path())?;
 
-        // Insert the user into the db and get its id
         // for each quote insert that into the db
+        for quote in &user_quotes {
+            let poster_id = uid_map
+                .get(&quote.poster.as_str())
+                .ok_or_else(|| format!("unable to find id of user {}", quote.poster))?;
+            insert_quote.execute(params![quote.quote, user_id, quote.time, poster_id, 0])?;
+        }
+
         // and create a rating record for each user that has rated it
     }
+
+    // Go back and populate favourite quotes and fix quote references
 
     Ok(())
 }
@@ -81,6 +126,7 @@ fn read_users(qbase: &Path) -> Result<Vec<User>> {
             users.push(user);
         }
     }
+    users.sort_by(|a, b| a.username.cmp(&b.username));
     Ok(users)
 }
 
@@ -157,8 +203,9 @@ impl FromStr for Quote {
                 .ok_or("missing poster")?,
             time: parts
                 .next()
-                .ok_or("missing time")
-                .and_then(|time| time.parse().map_err(|_err| "unable to parse time"))?,
+                .and_then(|time| if time == "0" { None } else { Some(time) })
+                .map(|time| time.parse().map_err(|_err| "unable to parse time"))
+                .transpose()?,
             ratings: parts
                 .next()
                 .map(ToOwned::to_owned)

@@ -5,7 +5,6 @@ CREATE TABLE IF NOT EXISTS "users"
     "firstname"          VARCHAR(50) NOT NULL,
     "surname"            VARCHAR(50) NOT NULL,
     "password_hash"      VARCHAR(50) NOT NULL,
-    "salt"               VARCHAR(50) DEFAULT '',
     "email"              VARCHAR(50) DEFAULT 'user@example.com',
     "last_posted"        TIMESTAMP,
     "favourite_quote_id" INTEGER

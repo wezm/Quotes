@@ -15,7 +15,7 @@ type Result<T> = std::result::Result<T, Error>;
 pub struct Quote {
     quote: String,
     poster: String,
-    time: u32,
+    time: u64,
     ratings: String,
     reference: Option<String>,
 }
@@ -34,7 +34,7 @@ pub struct User {
     username: String,
     first_name: String,
     last_name: String,
-    last_posted: Option<u32>,
+    last_posted: Option<u64>,
     favourite_quote: Option<String>,
 }
 
@@ -120,6 +120,17 @@ fn read_quotes(path: &Path) -> Result<Vec<Quote>> {
     Ok(quotes)
 }
 
+fn parse_quote_reference(raw: &str) -> Result<(String, u32)> {
+    let username = raw
+        .chars()
+        .take_while(|ch| !('0'..='9').contains(ch))
+        .collect::<String>();
+    raw[username.len()..]
+        .parse()
+        .map(|id| (username, id))
+        .map_err(Error::from)
+}
+
 impl User {
     fn quotes_path(&self) -> PathBuf {
         self.path.with_extension("quotes")
@@ -128,16 +139,7 @@ impl User {
     fn favourite_quote(&self) -> Result<Option<(String, u32)>> {
         self.favourite_quote
             .as_ref()
-            .map(|raw| {
-                let username = raw
-                    .chars()
-                    .take_while(|ch| !('0'..='9').contains(ch))
-                    .collect::<String>();
-                raw[username.len()..]
-                    .parse()
-                    .map(|id| (username, id))
-                    .map_err(Error::from)
-            })
+            .map(|raw| parse_quote_reference(raw))
             .transpose()
     }
 }
@@ -184,7 +186,7 @@ mod tests {
     #[test]
     fn favourite_quote() {
         let user = User {
-            path: PathBuf::from("/home/wmoore/Documents/freeshell/wmoore/quotes/wmoore.profile"),
+            path: PathBuf::from("/home/wmoore/Documents/quotes/wmoore.profile"),
             username: String::from("wmoore"),
             first_name: String::from("Wesley"),
             last_name: String::from("Moore"),
@@ -194,6 +196,14 @@ mod tests {
         assert_eq!(
             user.favourite_quote().unwrap(),
             Some((String::from("darnott"), 184))
+        );
+    }
+
+    #[test]
+    fn test_parse_quote_reference() {
+        assert_eq!(
+            parse_quote_reference("anryan26").unwrap(),
+            (String::from("anryan"), 26)
         );
     }
 }

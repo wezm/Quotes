@@ -72,21 +72,6 @@ fn main() -> Result<()> {
         uid_map.insert(user.username.as_str(), rowid);
     }
 
-    /*
-    quote: String,
-    poster: String,
-    time: u64,
-    ratings: String,
-    reference: Option<String>,
-
-    "quote_body"      TEXT,
-    "user_id"         INTEGER NOT NULL,
-    "created_at"      TIMESTAMP,
-    "poster_id"       INTEGER NOT NULL,
-    "rating"          INTEGER NOT NULL,
-    "parent_quote_id" INTEGER
-     */
-
     // Add quotes to the db
     let uid_map = uid_map; // drop mutability
     let mut insert_quote = conn.prepare("INSERT INTO quotes (quote_body, user_id, created_at, poster_id, rating) VALUES (?,?,?,?,?)")?;
@@ -190,6 +175,22 @@ impl User {
     }
 }
 
+impl Quote {
+    fn ratings(&self) -> Result<(u32, Vec<&str>)> {
+        if self.ratings == "0" {
+            return Ok((0, Vec::new()));
+        }
+
+        let (rating, users) = self
+            .ratings
+            .split_once(':')
+            .ok_or("unable to split rating on :")?;
+        let rating = rating.parse()?;
+        let rating_users = users.split(',').collect::<Vec<_>>();
+        Ok((rating, rating_users))
+    }
+}
+
 impl FromStr for Quote {
     type Err = &'static str;
 
@@ -243,6 +244,33 @@ mod tests {
         assert_eq!(
             user.favourite_quote().unwrap(),
             Some((String::from("darnott"), 184))
+        );
+    }
+
+    #[test]
+    fn quote_without_ratings() {
+        let quote = Quote {
+            quote: String::from("Quote"),
+            poster: String::from("user"),
+            time: Some(1061953950),
+            ratings: String::from("0"),
+            reference: None,
+        };
+        assert_eq!(quote.ratings().unwrap(), (0, Vec::new()));
+    }
+
+    #[test]
+    fn quote_with_ratings() {
+        let quote = Quote {
+            quote: String::from("Quote"),
+            poster: String::from("user"),
+            time: Some(1061953950),
+            ratings: String::from("4:anryan,wmoore,rliebich"),
+            reference: None,
+        };
+        assert_eq!(
+            quote.ratings().unwrap(),
+            (4, vec!["anryan", "wmoore", "rliebich"])
         );
     }
 

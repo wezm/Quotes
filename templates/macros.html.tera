@@ -1,0 +1,8 @@
+{% macro html_date(timestamp) %}
+  {% if timestamp != 0 %}
+    {# date("j M Y \<\S\P\A\N \c\l\a\s\s\=\"\\t\i\m\e\"\>g:i A\<\/\S\P\A\N\>" #}
+    {{ timestamp + 36000 | date(format='%-d %b %Y <span class="time">%-I:%M %p</span>') | safe }}
+  {% else %}
+    N/A
+  {% endif %}
+{% endmacro input %}

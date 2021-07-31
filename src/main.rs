@@ -3,13 +3,12 @@ extern crate rocket;
 
 use gumdrop::Options;
 use rocket::fairing::AdHoc;
+use rocket::fs::FileServer;
 use rocket::{Build, Rocket};
 use rocket_dyn_templates::Template;
-use rocket_sync_db_pools::rusqlite;
 
 use ::quotes::db::{self, QuotesDb};
 use quotes::quotes;
-use rocket::fs::FileServer;
 
 #[derive(Options)]
 struct Args {

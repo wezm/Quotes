@@ -1,0 +1,126 @@
+{% extends "layout" %}
+{% import "macros" as macros %}
+
+{% block content %}
+{# Displays a quote table for a user #}
+<H2>{{ username }}'s quotes</H2>
+<TABLE cellspacing=1 cellpadding=3 border=0 bgcolor="gray" width="100%">
+    <TR bgcolor="white">
+        <TD colspan=4 align="right">
+            <A href="$_SERVER[SCRIPT_NAME]?page=quotes&action=viewprofile&ofuser=$username">
+            <IMG src="/public/profile.gif" border=0 width=105 height=23></A>
+            <A href="$_SERVER[SCRIPT_NAME]?page=quotes&action=addquote&ofuser=$username">
+            <img src="/public/newquote.gif" alt"Post New Quote" height=23 width=127 border=0>
+            </A>
+        </TD>
+    </TR>
+    {#
+    if(!empty($_GET['highlight'])) {
+        // There is a highlight id
+        $highlight = $_GET['highlight'];
+    } else {
+        $highlight = 0;
+    }
+    #}
+    {% set highlight = 0 %}
+
+    {# Build table contents #}
+    {% for quote in quotes %}
+        {# global $qlinked; #}
+        {# $currentID = sprintf("$username%d", $i+1); #}
+        {% if quote.id == highlight %}
+            <TR bgcolor="#FFFF33">
+        {% elif loop.index0 is divisibleby(2) %}
+            {# Even row #}
+            <TR bgcolor="#e6eaff">
+        {% else %}
+            {# Odd row #}
+            <TR bgcolor="white">
+        {% endif %}
+
+        {# Fill in details #}
+        {# The quote #}
+
+        <TD><A name="quote{{ quote.id }}"></a>
+        <SPAN class="quote">
+        {# if(isset($qlinked)) { #}
+            {# <A href="$_SERVER[SCRIPT_NAME]?page=quotes&action=setfav&ref=$currentID"> #}
+        {# } #}
+
+        {{ quote.quote_body | striptags }}
+
+        {# if(isset($qlinked)) { #}
+            {# </A> #}
+        {# } #}
+
+        </SPAN>
+                </TD>
+
+        {# Quote poster and date #}
+        <TD width=150>
+            <SMALL>posted by
+                <A href="/{{ quote.poster_username }}">{{ quote.poster_username }}</A><BR>
+                {{ macros::html_date(timestamp=quote.created_at) }}
+            </SMALL>
+        </TD>
+
+        {# Editing options #}
+        <TD width=30 align="center">
+        {% if quote.parent_quote_id %}
+            {# This quote has a response, use the lightning icon #}
+            <A href="/{{ quote.parent_quote_username }}/quotes?highlight={{ quote.parent_quote_id }}#quote{{ quote.parent_quote_id }}">
+            <IMG src="/public/lightning.gif" border=0></A>
+        {% else %}
+            {# This quote has no response, use the pencil icon #}
+            <A href="/{{ username }}/quotes/new?ref={{ quote.id }}">
+            <IMG src="/public/pencil.gif" border=0 title="Add Linked Response"></A>
+        {% endif %}
+
+        </TD>
+
+        {# Rating #}
+        <TD width=75>
+        {# $viewer = $_SESSION['username']; #}
+        {% if quote.rating > 0 %}
+            {# This quote does have a rating, get the number of ratings #}
+            {# $rating = explode(":", $quote[3]); #}
+            {# $raters = explode(",", $rating[1]); #}
+            {# $rating[0] /= count($raters); #}
+            {% set raters = ratings[quote.id] %}
+            {% set ratings_count = raters | length %}
+            {% set rating = quote.rating / ratings_count | round %}
+
+            {# FIXME #}
+            {# if(!in_array($viewer, $raters)) { #}
+                {# I haven't rated this quote yet #}
+                {# <A href="$_SERVER[SCRIPT_NAME]?page=quotes&action=ratequote&ref= #}
+                {# echo   $username,$i+1,"">"; #}
+            {# } #}
+
+            {# Display the appropriate stars #}
+            <IMG src="/public/{{ rating }}star.gif" border=0>
+
+            {# if(!in_array($viewer, $raters)) { #}
+                {# </A> #}
+            {# } #}
+        {% else %}
+            {# This quote has never been rated #}
+            <A href="$_SERVER[SCRIPT_NAME]?page=quotes&action=ratequote&ref=$username,$i+1,"><SPAN class="small">Unrated</SPAN>
+            </A>
+        {% endif %}
+
+        </TD>
+
+        {# End of row #}
+    </TR>
+    {% endfor %}
+
+    {% if quotes | length == 0 %}
+        <TR bgcolor="#e6eaff">
+            <TD>{{ username }} is yet to be quoted.</TD>
+        </TR>
+    {% endif %}
+
+    {# End of TABLE #}
+    </TABLE>
+{% endblock content %}

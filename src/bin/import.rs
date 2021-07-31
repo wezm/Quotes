@@ -74,12 +74,15 @@ fn main() -> Result<()> {
 
     // Add quotes to the db
     let uid_map = uid_map; // drop mutability
+    let mut quotes_map = HashMap::with_capacity(uid_map.len());
     let mut insert_quote = conn.prepare("INSERT INTO quotes (quote_body, user_id, created_at, poster_id, rating) VALUES (?,?,?,?,?)")?;
     let mut insert_rating = conn.prepare("INSERT INTO ratings (quote_id, user_id) VALUES (?,?)")?;
     let mut find_quote_id =
         conn.prepare("SELECT id from quotes WHERE user_id = ? AND quote_body = ?")?;
     let mut update_fav_quote =
         conn.prepare("UPDATE users SET favourite_quote_id = ? WHERE id = ?")?;
+    let mut update_ref_quote =
+        conn.prepare("UPDATE quotes SET parent_quote_id = ? WHERE id = ?")?;
     for user in &users {
         println!("Process {} quotes", user.username);
         let user_id = username_to_id(&uid_map, &user.username)?;
@@ -103,19 +106,22 @@ fn main() -> Result<()> {
                 insert_rating.execute([qid, rater_id])?;
             }
         }
+
+        quotes_map.insert(user.username.as_str(), user_quotes);
     }
 
     // Go back and populate favourite quotes and fix quote references
+    let quotes_map = quotes_map; // drop mut
     for user in &users {
+        let user_id = username_to_id(&uid_map, &user.username)?;
         println!("Set favourite quote of {}", user.username);
         if let Some((fav_username, fav_quote_index)) = user.favourite_quote()? {
-            let user_id = username_to_id(&uid_map, &user.username)?;
             let fav_user = users
                 .iter()
                 .find(|user| user.username == fav_username)
                 .ok_or("unable to find favourite user")?;
             let fav_user_id = username_to_id(&uid_map, &fav_user.username)?;
-            let fav_user_quotes = read_quotes(&fav_user.quotes_path())?;
+            let fav_user_quotes = &quotes_map[fav_username.as_str()];
             let fav_quote = fav_user_quotes
                 .get(fav_quote_index - 1)
                 .ok_or("invalid favourite quote index")?;
@@ -128,6 +134,30 @@ fn main() -> Result<()> {
                     "expected one row to be updated got {}",
                     updated
                 )));
+            }
+        }
+
+        println!("Resolve quote references of {}", user.username);
+        for quote in &quotes_map[user.username.as_str()] {
+            if let Some(ref reference) = quote.reference {
+                let (ref_username, ref_index) = parse_quote_reference(reference)?;
+                let ref_user_id = username_to_id(&uid_map, &ref_username)?;
+                let ref_user_quotes = &quotes_map[ref_username.as_str()];
+                let ref_quote = ref_user_quotes
+                    .get(ref_index - 1)
+                    .ok_or("invalid reference quote index")?;
+                let ref_quote_id: i64 = find_quote_id
+                    .query_row(params![ref_user_id, ref_quote.quote], |row| row.get(0))?;
+                let this_quote_id: i64 =
+                    find_quote_id.query_row(params![user_id, quote.quote], |row| row.get(0))?;
+                println!("{} references {}", this_quote_id, ref_quote_id);
+                let updated = update_ref_quote.execute([ref_quote_id, this_quote_id])?;
+                if updated != 1 {
+                    return Err(Error::from(format!(
+                        "expected one row to be updated got {}",
+                        updated
+                    )));
+                }
             }
         }
     }

@@ -75,26 +75,70 @@ fn main() -> Result<()> {
     // Add quotes to the db
     let uid_map = uid_map; // drop mutability
     let mut insert_quote = conn.prepare("INSERT INTO quotes (quote_body, user_id, created_at, poster_id, rating) VALUES (?,?,?,?,?)")?;
+    let mut insert_rating = conn.prepare("INSERT INTO ratings (quote_id, user_id) VALUES (?,?)")?;
+    let mut find_quote_id =
+        conn.prepare("SELECT id from quotes WHERE user_id = ? AND quote_body = ?")?;
+    let mut update_fav_quote =
+        conn.prepare("UPDATE users SET favourite_quote_id = ? WHERE id = ?")?;
     for user in &users {
-        let user_id = uid_map
-            .get(&user.username.as_str())
-            .ok_or_else(|| format!("unable to find id of user {}", user.username))?;
+        println!("Process {} quotes", user.username);
+        let user_id = username_to_id(&uid_map, &user.username)?;
         let user_quotes = read_quotes(&user.quotes_path())?;
 
         // for each quote insert that into the db
         for quote in &user_quotes {
-            let poster_id = uid_map
-                .get(&quote.poster.as_str())
-                .ok_or_else(|| format!("unable to find id of user {}", quote.poster))?;
-            insert_quote.execute(params![quote.quote, user_id, quote.time, poster_id, 0])?;
-        }
+            let poster_id = username_to_id(&uid_map, &quote.poster)?;
+            let (rating, rating_users) = quote.ratings()?;
+            let qid = insert_quote.insert(params![
+                quote.quote,
+                user_id,
+                quote.time,
+                poster_id,
+                rating
+            ])?;
 
-        // and create a rating record for each user that has rated it
+            // and create a rating record for each user that has rated it
+            for rater in rating_users {
+                let rater_id = username_to_id(&uid_map, rater)?;
+                insert_rating.execute([qid, rater_id])?;
+            }
+        }
     }
 
     // Go back and populate favourite quotes and fix quote references
+    for user in &users {
+        println!("Set favourite quote of {}", user.username);
+        if let Some((fav_username, fav_quote_index)) = user.favourite_quote()? {
+            let user_id = username_to_id(&uid_map, &user.username)?;
+            let fav_user = users
+                .iter()
+                .find(|user| user.username == fav_username)
+                .ok_or("unable to find favourite user")?;
+            let fav_user_id = username_to_id(&uid_map, &fav_user.username)?;
+            let fav_user_quotes = read_quotes(&fav_user.quotes_path())?;
+            let fav_quote = fav_user_quotes
+                .get(fav_quote_index - 1)
+                .ok_or("invalid favourite quote index")?;
+            // Find the favourite quote in the db
+            let fav_quote_id =
+                find_quote_id.query_row(params![fav_user_id, fav_quote.quote], |row| row.get(0))?;
+            let updated = update_fav_quote.execute([fav_quote_id, user_id])?;
+            if updated != 1 {
+                return Err(Error::from(format!(
+                    "expected one row to be updated got {}",
+                    updated
+                )));
+            }
+        }
+    }
 
     Ok(())
+}
+
+fn username_to_id(map: &HashMap<&str, i64>, username: &str) -> Result<i64> {
+    map.get(&username)
+        .copied()
+        .ok_or_else(|| Error::from(format!("unable to find id of user {}", username)))
 }
 
 fn read_users(qbase: &Path) -> Result<Vec<User>> {
@@ -151,7 +195,7 @@ fn read_quotes(path: &Path) -> Result<Vec<Quote>> {
     Ok(quotes)
 }
 
-fn parse_quote_reference(raw: &str) -> Result<(String, u32)> {
+fn parse_quote_reference(raw: &str) -> Result<(String, usize)> {
     let username = raw
         .chars()
         .take_while(|ch| !('0'..='9').contains(ch))
@@ -167,7 +211,7 @@ impl User {
         self.path.with_extension("quotes")
     }
 
-    fn favourite_quote(&self) -> Result<Option<(String, u32)>> {
+    fn favourite_quote(&self) -> Result<Option<(String, usize)>> {
         self.favourite_quote
             .as_ref()
             .map(|raw| parse_quote_reference(raw))

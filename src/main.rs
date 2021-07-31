@@ -4,9 +4,12 @@ extern crate rocket;
 use gumdrop::Options;
 use rocket::fairing::AdHoc;
 use rocket::{Build, Rocket};
-use rocket_sync_db_pools::{database, rusqlite};
+use rocket_dyn_templates::Template;
+use rocket_sync_db_pools::rusqlite;
 
-use quotes::db;
+use ::quotes::db::{self, QuotesDb};
+use quotes::quotes;
+use rocket::fs::FileServer;
 
 #[derive(Options)]
 struct Args {
@@ -15,14 +18,6 @@ struct Args {
 
     #[options(no_short, help = "run the database migrations")]
     migrate: bool,
-}
-
-#[database("quotes_db")]
-struct QuotesDb(rusqlite::Connection);
-
-#[get("/")]
-fn index() -> &'static str {
-    "Hello, world!"
 }
 
 #[launch]
@@ -35,14 +30,17 @@ fn rocket() -> _ {
             .attach(AdHoc::on_ignite("Rusqlite Init", move |rocket| {
                 migrate(args.migrate, rocket)
             }))
-            .mount("/rusqlite", routes![index])
     });
 
-    rocket::build().attach(db).mount("/", routes![index])
+    rocket::build()
+        .attach(db)
+        .attach(Template::fairing())
+        .mount("/", quotes::routes())
+        .mount("/public", FileServer::from("public"))
 }
 
 async fn migrate(run_migrations: bool, rocket: Rocket<Build>) -> Rocket<Build> {
-    // TODO: In a scenario where there are multiple servers, only one should run the migrations
+    // NOTE: In a scenario where there are multiple servers, only one should run the migrations
     // and the others should wait for it.
     if run_migrations {
         QuotesDb::get_one(&rocket)

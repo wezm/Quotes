@@ -1,0 +1,13 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Quotes</title>
+    <link rel="stylesheet" type="text/css" href="/public/quotes.css" />
+  </head>
+  <body>
+    {% include "nav" %}
+
+    {% block content %}{% endblock content %}
+  </body>
+</html>

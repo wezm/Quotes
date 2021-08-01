@@ -7,6 +7,7 @@ default-run = "quotes"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
+chrono = {version = "0.4.1", default-features = false, features = ["std", "clock"]} # needs to match tera
 refinery = { version = "0.6", features = ["rusqlite"] }
 rocket = "0.5.0-rc.1"
 rusqlite = "0.25.3"

@@ -5,6 +5,8 @@ use rocket_sync_db_pools::{database, rusqlite};
 
 use crate::Result;
 
+// FIXME: Is 16 (the default) statements in the statement cache enough
+
 #[database("quotes_db")]
 pub struct QuotesDb(rusqlite::Connection);
 
@@ -43,6 +45,7 @@ pub fn home_query(conn: &mut rusqlite::Connection) -> Result<Vec<HomeRow>, rusql
 #[serde(crate = "rocket::serde")]
 pub struct QuoteRow {
     pub id: i64,
+    pub user_id: i64,
     pub quote_body: String,
     pub created_at: Option<u32>,
     pub poster_username: String,
@@ -58,6 +61,7 @@ pub fn user_quotes(
     let sql = "\
     SELECT \
         quotes.id,
+        quotes.user_id,
         quotes.quote_body,
         quotes.created_at,
         users.username AS poster_username,
@@ -77,16 +81,57 @@ pub fn user_quotes(
     while let Some(row) = rows.next()? {
         results.push(QuoteRow {
             id: row.get(0)?,
-            quote_body: row.get(1)?,
-            created_at: row.get(2)?,
-            poster_username: row.get(3)?,
-            rating: row.get(4)?,
-            parent_quote_id: row.get(5)?,
-            parent_quote_username: row.get(6)?,
+            user_id: row.get(1)?,
+            quote_body: row.get(2)?,
+            created_at: row.get(3)?,
+            poster_username: row.get(4)?,
+            rating: row.get(5)?,
+            parent_quote_id: row.get(6)?,
+            parent_quote_username: row.get(7)?,
         })
     }
 
     Ok(results)
+}
+
+pub fn get_quote(
+    conn: &mut rusqlite::Connection,
+    quote_id: i64,
+) -> Result<Option<QuoteRow>, rusqlite::Error> {
+    let sql = "\
+    SELECT \
+        quotes.id,
+        quotes.user_id,
+        quotes.quote_body,
+        quotes.created_at,
+        users.username AS poster_username,
+        quotes.rating,
+        quotes.parent_quote_id,
+        u2.username AS parent_quote_username
+    FROM quotes \
+    LEFT JOIN users ON (users.id = quotes.poster_id) \
+    LEFT JOIN quotes AS q2 ON (q2.id = quotes.parent_quote_id) \
+    LEFT JOIN users u2 ON (u2.id = q2.user_id) \
+    WHERE quotes.id = ?
+    ORDER BY quotes.created_at, quotes.id";
+    let mut stmt = conn.prepare_cached(sql)?;
+
+    match stmt.query_row([quote_id], |row| {
+        Ok(QuoteRow {
+            id: row.get(0)?,
+            user_id: row.get(1)?,
+            quote_body: row.get(2)?,
+            created_at: row.get(3)?,
+            poster_username: row.get(4)?,
+            rating: row.get(5)?,
+            parent_quote_id: row.get(6)?,
+            parent_quote_username: row.get(7)?,
+        })
+    }) {
+        Ok(quote) => Ok(Some(quote)),
+        Err(rusqlite::Error::QueryReturnedNoRows) => Ok(None),
+        Err(err) => Err(err),
+    }
 }
 
 /// Returns a map of quote id to rater ids
@@ -119,7 +164,7 @@ pub struct UserRow {
     pub firstname: String,
     pub surname: String,
     pub last_posted: Option<u32>,
-    pub favourite_quote_id: Option<u32>,
+    pub favourite_quote_id: Option<i64>,
 }
 
 pub fn user_map(
@@ -152,6 +197,81 @@ pub fn user_map(
     }
 
     Ok(results)
+}
+
+pub fn quote_counts(conn: &mut rusqlite::Connection) -> Result<Vec<(i64, usize)>, rusqlite::Error> {
+    let sql = "\
+    SELECT user_id, count(id) as quote_count \
+    FROM quotes \
+    GROUP BY user_id \
+    ORDER BY count(id) DESC";
+    let mut stmt = conn.prepare_cached(sql)?;
+
+    let mut results = Vec::new();
+    let mut rows = stmt.query([])?;
+    while let Some(row) = rows.next()? {
+        let user_id = row.get(0)?;
+        let count = row.get(1)?;
+        results.push((user_id, count));
+    }
+
+    Ok(results)
+}
+
+pub fn self_quote_count(
+    conn: &mut rusqlite::Connection,
+    user_id: i64,
+) -> Result<usize, rusqlite::Error> {
+    let sql = "\
+    SELECT count(id) as quote_count \
+    FROM quotes \
+    WHERE poster_id = ?1 AND user_id = ?1";
+    let mut stmt = conn.prepare_cached(sql)?;
+
+    let count: Option<usize> = stmt.query_row([user_id], |row| row.get(0))?;
+    Ok(count.unwrap_or(0))
+}
+
+pub fn user_post_count(
+    conn: &mut rusqlite::Connection,
+    user_id: i64,
+) -> Result<usize, rusqlite::Error> {
+    let sql = "\
+    SELECT count(id) as quote_count \
+    FROM quotes \
+    WHERE poster_id = ?";
+    let mut stmt = conn.prepare_cached(sql)?;
+
+    let count: Option<usize> = stmt.query_row([user_id], |row| row.get(0))?;
+    Ok(count.unwrap_or(0))
+}
+
+pub fn average_rating(
+    conn: &mut rusqlite::Connection,
+    user_id: i64,
+) -> Result<f64, rusqlite::Error> {
+    let sql = "\
+    SELECT CAST(sum(stats.rating) AS REAL) / CAST(sum(stats.rating_count) AS REAL) AS average_rating \
+    FROM \
+        (SELECT quotes.rating , count(ratings.user_id) as rating_count \
+        FROM quotes JOIN ratings ON quotes.id = ratings.quote_id \
+        WHERE quotes.user_id = ? \
+        GROUP BY ratings.quote_id) stats";
+    let mut stmt = conn.prepare_cached(sql)?;
+
+    let count: Option<f64> = stmt.query_row([user_id], |row| row.get(0))?;
+    Ok(count.unwrap_or(0.))
+}
+
+pub fn last_quoted(
+    conn: &mut rusqlite::Connection,
+    user_id: i64,
+) -> Result<Option<u32>, rusqlite::Error> {
+    let sql = "SELECT max(created_at) FROM quotes where user_id = ?";
+    let mut stmt = conn.prepare_cached(sql)?;
+
+    let timestamp: Option<u32> = stmt.query_row([user_id], |row| row.get(0))?;
+    Ok(timestamp)
 }
 
 pub fn migrate(conn: &mut rusqlite::Connection) -> Result<()> {

@@ -1224,6 +1224,7 @@ dependencies = [
 name = "quotes"
 version = "0.1.0"
 dependencies = [
+ "chrono",
  "gumdrop",
  "refinery",
  "rocket",

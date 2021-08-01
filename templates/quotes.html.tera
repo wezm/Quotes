@@ -7,7 +7,7 @@
 <TABLE cellspacing=1 cellpadding=3 border=0 bgcolor="gray" width="100%">
     <TR bgcolor="white">
         <TD colspan=4 align="right">
-            <A href="$_SERVER[SCRIPT_NAME]?page=quotes&action=viewprofile&ofuser=$username">
+            <A href="/{{ username }}">
             <IMG src="/public/profile.gif" border=0 width=105 height=23></A>
             <A href="$_SERVER[SCRIPT_NAME]?page=quotes&action=addquote&ofuser=$username">
             <img src="/public/newquote.gif" alt"Post New Quote" height=23 width=127 border=0>

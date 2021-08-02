@@ -3,15 +3,23 @@ use std::collections::HashMap;
 
 use chrono::NaiveDateTime;
 use rocket::response::status::NotFound;
-use rocket::response::Debug;
+use rocket::response::{Debug, Redirect};
 use rocket::serde::Serialize;
 use rocket::Route;
 use rocket_dyn_templates::{tera, Template};
 
+use crate::auth::{self, AuthenticatedUser};
 use crate::db::{self, HomeRow, QuoteRow, QuotesDb, UserRow};
 
 pub fn routes() -> Vec<Route> {
-    routes![home, profile, quotes]
+    routes![
+        home,
+        home_redirect,
+        profile,
+        profile_redirect,
+        quotes,
+        quotes_redirect
+    ]
 }
 
 #[derive(Serialize)]
@@ -29,8 +37,16 @@ struct QuotesContext {
     ratings: HashMap<i64, Vec<i64>>,
 }
 
+#[get("/", rank = 2)]
+fn home_redirect() -> Redirect {
+    Redirect::to(uri!(auth::login))
+}
+
 #[get("/")]
-async fn home(db: QuotesDb) -> Result<Template, Debug<rusqlite::Error>> {
+pub async fn home(
+    current_user: AuthenticatedUser,
+    db: QuotesDb,
+) -> Result<Template, Debug<rusqlite::Error>> {
     let rows = db.run(|conn| db::home_query(conn)).await?;
     Ok(Template::render("home", HomeContext { users: rows }))
 }
@@ -49,8 +65,17 @@ struct ProfileRow {
     value: String,
 }
 
-#[get("/<username>")]
-async fn profile(db: QuotesDb, username: String) -> Result<Template, NotFound<&'static str>> {
+#[get("/user/<username>", rank = 2)]
+fn profile_redirect(username: String) -> Redirect {
+    Redirect::to(uri!(auth::login))
+}
+
+#[get("/user/<username>")]
+async fn profile(
+    current_user: AuthenticatedUser,
+    db: QuotesDb,
+    username: String,
+) -> Result<Template, NotFound<&'static str>> {
     let user_map: HashMap<String, UserRow> =
         db.run(|conn| db::user_map(conn)).await.expect("FIXME");
     let users = user_map.values().collect::<Vec<_>>();
@@ -186,8 +211,17 @@ async fn profile(db: QuotesDb, username: String) -> Result<Template, NotFound<&'
     ))
 }
 
-#[get("/<username>/quotes")]
-async fn quotes(db: QuotesDb, username: String) -> Result<Template, NotFound<&'static str>> {
+#[get("/quotes/<username>", rank = 2)]
+fn quotes_redirect(username: String) -> Redirect {
+    Redirect::to(uri!(auth::login))
+}
+
+#[get("/quotes/<username>")]
+async fn quotes(
+    current_user: AuthenticatedUser,
+    db: QuotesDb,
+    username: String,
+) -> Result<Template, NotFound<&'static str>> {
     let users = db.run(|conn| db::user_map(conn)).await.expect("FIXME");
     let user_id = match users.get(&username) {
         Some(user) => user.id,

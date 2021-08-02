@@ -167,6 +167,31 @@ pub struct UserRow {
     pub favourite_quote_id: Option<i64>,
 }
 
+pub fn get_user(conn: &mut rusqlite::Connection, user_id: i64) -> Result<UserRow, rusqlite::Error> {
+    let sql = "\
+    SELECT \
+        id,
+        username,
+        firstname,
+        surname,
+        last_posted,
+        favourite_quote_id
+    FROM users \
+    WHERE id = ?";
+    let mut stmt = conn.prepare_cached(sql)?;
+
+    stmt.query_row([user_id], |row| {
+        Ok(UserRow {
+            id: row.get(0)?,
+            username: row.get(1)?,
+            firstname: row.get(2)?,
+            surname: row.get(3)?,
+            last_posted: row.get(4)?,
+            favourite_quote_id: row.get(5)?,
+        })
+    })
+}
+
 pub fn user_map(
     conn: &mut rusqlite::Connection,
 ) -> Result<HashMap<String, UserRow>, rusqlite::Error> {
@@ -197,6 +222,28 @@ pub fn user_map(
     }
 
     Ok(results)
+}
+
+#[derive(Serialize)]
+#[serde(crate = "rocket::serde")]
+pub struct UserForLogin {
+    pub id: i64,
+    pub password_hash: String,
+}
+
+pub fn user_for_login(
+    conn: &mut rusqlite::Connection,
+    username: &str,
+) -> Result<UserForLogin, rusqlite::Error> {
+    let sql = "SELECT id, password_hash FROM users WHERE username = ?";
+    let mut stmt = conn.prepare_cached(sql)?;
+
+    stmt.query_row([username], |row| {
+        Ok(UserForLogin {
+            id: row.get(0)?,
+            password_hash: row.get(1)?,
+        })
+    })
 }
 
 pub fn quote_counts(conn: &mut rusqlite::Connection) -> Result<Vec<(i64, usize)>, rusqlite::Error> {

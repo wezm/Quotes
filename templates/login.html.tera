@@ -1,0 +1,21 @@
+{% extends "layout" %}
+
+{% block content %}
+    <H2>Login</H2>
+    <form action="/login" method="POST">
+        <TABLE border=0>
+            <TR>
+                <TD align="right"><label for="username">Username:</label></TD>
+                <TD><input type="text" name="username" id="username" size=8></TD>
+            </TR>
+            <TR>
+                <TD align="right"><label for="password">Password:</label></TD>
+                <TD><INPUT type="password" name="password" id="password" size=8><BR></TD>
+            </TR>
+            <TR>
+                <td>&nbsp;</td>
+                <TD><input type="submit" value="Login"></TD>
+            </TR>
+        </TABLE>
+    </form>
+{% endblock content %}

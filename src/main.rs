@@ -8,7 +8,7 @@ use rocket::{Build, Rocket};
 use rocket_dyn_templates::Template;
 
 use ::quotes::db::{self, QuotesDb};
-use quotes::quotes;
+use ::quotes::{auth, quotes};
 
 #[derive(Options)]
 struct Args {
@@ -34,6 +34,7 @@ fn rocket() -> _ {
     rocket::build()
         .attach(db)
         .attach(Template::fairing())
+        .mount("/", auth::routes())
         .mount("/", quotes::routes())
         .mount("/public", FileServer::from("public"))
 }

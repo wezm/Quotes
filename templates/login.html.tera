@@ -1,7 +1,6 @@
 {% extends "layout" %}
 
 {% block content %}
-    <H2>Login</H2>
     <form action="/login" method="POST">
         <TABLE border=0>
             <TR>

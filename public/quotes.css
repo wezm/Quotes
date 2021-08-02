@@ -232,3 +232,22 @@ TR.news_content { background-color: #446D8C; }
     color: #FFCC00;
 }
 
+
+.flash {
+    border: 1px solid #335C7B;
+    background-color: hsl(205.8, 34.6%, 80%);
+    margin: 1em 0;
+    padding: 0.25em 0.5em;
+}
+.flash-success {
+    border-color: green;
+    background-color: hsl(120, 100%, 95%);
+}
+.flash-warning {
+    border-color: #FFCC00;
+    background-color: hsl(48, 100%, 85%);
+}
+.flash-error {
+    border-color: red;
+    background-color: hsl(0, 100%, 90%);
+}

@@ -1,19 +1,19 @@
 //! User authentication.
 
 // TODO: Refresh session cookie on new requests
-use std::collections::HashMap;
 
+use rocket::form::Form;
 use rocket::http::{Cookie, CookieJar};
 use rocket::outcome::{try_outcome, IntoOutcome};
 use rocket::request::{FlashMessage, FromRequest, Outcome, Request};
 use rocket::response::{Debug, Flash, Redirect};
+use rocket::serde::Serialize;
 use rocket::Route;
-use rocket_dyn_templates::{Template};
+use rocket_dyn_templates::Template;
 use time::Duration; // for Cookie
 
 use crate::db::{self, QuotesDb, UserRow};
 use crate::quotes;
-use rocket::form::Form;
 
 pub const QUOTES_SESSION: &str = "QUOTES_SESSION";
 
@@ -69,7 +69,10 @@ async fn login(
 ) -> Result<Flash<Redirect>, Debug<rusqlite::Error>> {
     let form = form.into_inner();
     let username = form.username;
-    match db.run(move |conn| db::user_for_login(conn, &username)).await {
+    match db
+        .run(move |conn| db::user_for_login(conn, &username))
+        .await
+    {
         Ok(user) => {
             if verify(&user.password_hash, form.password.as_bytes()) {
                 let cookie = Cookie::build(QUOTES_SESSION, user.id.to_string())
@@ -85,20 +88,14 @@ async fn login(
                     "Login successful",
                 ))
             } else {
-                Ok(Flash::error(
-                    Redirect::to(uri!(login)),
-                    "Invalid password.",
-                ))
+                Ok(Flash::error(Redirect::to(uri!(login)), "Invalid password."))
             }
         }
         Err(rusqlite::Error::QueryReturnedNoRows) => {
             // TODO: Make a better HTML response?
-            Ok(Flash::error(
-                Redirect::to(uri!(login)),
-                "Invalid password.",
-            ))
+            Ok(Flash::error(Redirect::to(uri!(login)), "Invalid password."))
         }
-        Err(err) => Err(err.into())
+        Err(err) => Err(err.into()),
     }
 }
 
@@ -113,11 +110,19 @@ fn login_user(_user: AuthenticatedUser) -> Redirect {
     Redirect::to(uri!(quotes::home))
 }
 
+#[derive(Serialize)]
+#[serde(crate = "rocket::serde")]
+struct LoginContext<'a, 'b> {
+    title: &'a str,
+    flash: Option<FlashMessage<'b>>,
+}
+
 #[get("/login", rank = 2)]
 pub fn do_login(flash: Option<FlashMessage<'_>>) -> Template {
-    let mut context = HashMap::new();
-    let flash_message = flash.as_ref().map(|flash| flash.message());
-    context.insert("flash", &flash_message);
+    let context = LoginContext {
+        title: "Login",
+        flash,
+    };
     Template::render("login", context)
 }
 

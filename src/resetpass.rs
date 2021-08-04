@@ -1,5 +1,6 @@
 use std::time::{SystemTime, UNIX_EPOCH};
 
+use log::{info, warn};
 use rocket::form::Form;
 use rocket::request::FlashMessage;
 use rocket::response::{Debug, Flash, Redirect};
@@ -65,10 +66,10 @@ async fn do_forgotpass(
                 .await?;
 
             // send email
-            println!("Send reset password email to {}", user.email);
+            info!("Send reset password email to {}", user.email);
             // TODO: spawn task
-            if let Err(err) = email::forgot_password(&config, &user.email, &reset_token) {
-                println!("Sending email to {} failed: {:?}", user.email, err);
+            if let Err(err) = email::forgot_password(&config, &user.email, &reset_token).await {
+                warn!("Sending email to {} failed: {:?}", user.email, err);
             }
 
             Ok(Flash::success(

@@ -1513,6 +1513,7 @@ dependencies = [
  "chrono",
  "getrandom",
  "gumdrop",
+ "log",
  "mailgun-sdk",
  "refinery",
  "rocket",
@@ -1521,6 +1522,7 @@ dependencies = [
  "rusqlite",
  "rust-argon2",
  "time 0.2.27",
+ "tokio",
 ]
 
 [[package]]

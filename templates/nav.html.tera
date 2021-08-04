@@ -1,18 +1,18 @@
-    <DIV class="quotes_links">
-        Logged in as {{ current_user.username }}<BR>
-        <SPAN class="quotes_links seperator">~</SPAN>
-        {# <?php if($_SESSION['username'] != "Administrator") { ?> #}
-        <A href="/">Quotes Home</A>
-        <SPAN class="quotes_links seperator">&middot;</SPAN>
-        <A href="/viewquotes">View All</A>
-        <SPAN class="quotes_links seperator">&middot;</SPAN>
-        <A href="/addquote">Add Quote</A>
-        <SPAN class="quotes_links seperator">&middot;</SPAN>
-        <A href="/user/{{ current_user.username }}">Manage Profile</A>
-        {# <?php } else { ?> #}
-        {# <A href="<?php echo $_SERVER[SCRIPT_NAME] ?>?page=quotes">Admin Page</A> #}
-        {# <?php } ?> #}
-        <SPAN class="quotes_links seperator">&middot;</SPAN>
-        <A href="/logout">Logout</A>
-        <SPAN class="quotes_links seperator">~</SPAN>
-    </DIV>
+<header class="quotes_links">
+    Logged in as {{ current_user.username }}<BR>
+    <SPAN class="quotes_links seperator">~</SPAN>
+    {# <?php if($_SESSION['username'] != "Administrator") { ?> #}
+    <A href="/">Quotes Home</A>
+    <SPAN class="quotes_links seperator">&middot;</SPAN>
+    <A href="/viewquotes">View All</A>
+    <SPAN class="quotes_links seperator">&middot;</SPAN>
+    <A href="/addquote">Add Quote</A>
+    <SPAN class="quotes_links seperator">&middot;</SPAN>
+    <A href="/user/{{ current_user.username }}">Manage Profile</A>
+    {# <?php } else { ?> #}
+    {# <A href="<?php echo $_SERVER[SCRIPT_NAME] ?>?page=quotes">Admin Page</A> #}
+    {# <?php } ?> #}
+    <SPAN class="quotes_links seperator">&middot;</SPAN>
+    <A href="/logout">Logout</A>
+    <SPAN class="quotes_links seperator">~</SPAN>
+</header>

@@ -1,3 +1,0 @@
-[global.databases]
-quotes_db = { url = "quotes_dev.db" }
-

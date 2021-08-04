@@ -1,7 +1,7 @@
 use mailgun_sdk::send_message::{SendMessageParam, SendMessageParamList, SendMessageResponse};
 use mailgun_sdk::{Client, ClientError, ParamList};
 
-use crate::auth;
+use crate::resetpass;
 use crate::QuotesConfig;
 
 pub fn forgot_password(
@@ -11,7 +11,7 @@ pub fn forgot_password(
 ) -> Result<SendMessageResponse, ClientError> {
     let client = Client::new(&config.mailgun_api_key, &config.mailgun_domain);
 
-    let reset_uri = uri!("https://quotes.randome.net", auth::resetpass(token));
+    let reset_uri = uri!("https://quotes.randome.net", resetpass::resetpass(token));
     let body = format!(
         "Follow this link to reset your quotes page password:\n{}",
         reset_uri

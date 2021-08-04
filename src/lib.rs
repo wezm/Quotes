@@ -7,6 +7,7 @@ pub mod auth;
 pub mod db;
 mod email;
 pub mod quotes;
+pub mod resetpass;
 
 /// Error returned by most functions.
 ///

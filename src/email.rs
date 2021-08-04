@@ -2,14 +2,14 @@ use log::info;
 use mailgun_sdk::send_message::{SendMessageParam, SendMessageParamList, SendMessageResponse};
 use mailgun_sdk::{Client, ParamList};
 
-use crate::resetpass;
 use crate::QuotesConfig;
+use crate::{resetpass, QuotesError};
 
 pub async fn forgot_password(
     config: &QuotesConfig,
     to: &str,
     token: &str,
-) -> Result<SendMessageResponse, Box<dyn std::error::Error>> {
+) -> Result<SendMessageResponse, QuotesError> {
     let client = Client::new(&config.mailgun_api_key, &config.mailgun_domain);
     let reset_uri = uri!("https://quotes.randome.net", resetpass::resetpass(token));
     let body = format!(
@@ -35,5 +35,5 @@ pub async fn forgot_password(
         }
     })
     .await?
-    .map_err(|err| err.into())
+    .map_err(QuotesError::from)
 }

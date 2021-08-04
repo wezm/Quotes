@@ -10,6 +10,7 @@ use rocket_dyn_templates::Template;
 
 use crate::db::{self, QuotesDb};
 use crate::{auth, email, quotes, QuotesConfig};
+use auth::FlashContext;
 
 pub const TOKEN_VALIDITY_DURATION: std::time::Duration = std::time::Duration::from_secs(10 * 60); // 10 mins
 
@@ -17,16 +18,9 @@ pub fn routes() -> Vec<Route> {
     routes![forgotpass, do_forgotpass, resetpass, do_resetpass,]
 }
 
-#[derive(Serialize)]
-#[serde(crate = "rocket::serde")]
-struct ForgotPassContext<'a, 'b> {
-    title: &'a str,
-    flash: Option<FlashMessage<'b>>,
-}
-
 #[get("/forgotpass")]
 pub fn forgotpass(flash: Option<FlashMessage<'_>>) -> Template {
-    let context = ForgotPassContext {
+    let context = FlashContext {
         title: "Forgot Password",
         flash,
     };

@@ -14,7 +14,7 @@ use rocket_dyn_templates::Template;
 use time::Duration; // for Cookie
 
 use crate::db::{self, QuotesDb, UserRow};
-use crate::quotes;
+use crate::{quotes, QuotesError};
 
 pub const QUOTES_SESSION: &str = "QUOTES_SESSION";
 
@@ -34,20 +34,33 @@ struct LoginForm {
     password: String,
 }
 
+#[derive(Serialize)]
+#[serde(crate = "rocket::serde")]
+pub(crate) struct FlashContext<'a, 'b> {
+    pub(crate) title: &'a str,
+    pub(crate) flash: Option<FlashMessage<'b>>,
+}
+
+#[derive(Debug)]
+pub enum AuthenticatedUserError {
+    Database(rusqlite::Error),
+    GuardFailure,
+}
+
 pub fn routes() -> Vec<Route> {
     routes![login, do_login, login_user, logout,]
 }
 
 #[rocket::async_trait]
 impl<'r> FromRequest<'r> for AuthenticatedUser {
-    type Error = rusqlite::Error;
+    type Error = AuthenticatedUserError;
 
     async fn from_request(request: &'r Request<'_>) -> Outcome<Self, Self::Error> {
         // TODO: use the request local state
         let db = try_outcome!(request
             .guard::<QuotesDb>()
             .await
-            .map_failure(|(status, ())| (status, rusqlite::Error::QueryReturnedNoRows))); // FIXME error type
+            .map_failure(|(status, ())| (status, AuthenticatedUserError::GuardFailure)));
 
         let user_id = try_outcome!(request
             .cookies()
@@ -58,6 +71,7 @@ impl<'r> FromRequest<'r> for AuthenticatedUser {
         db.run(move |conn| db::get_user(conn, user_id))
             .await
             .map(AuthenticatedUser)
+            .map_err(|err| err.into())
             .or_forward(())
     }
 }
@@ -67,15 +81,21 @@ async fn do_login(
     db: QuotesDb,
     cookies: &CookieJar<'_>,
     form: Form<LoginForm>,
-) -> Result<Flash<Redirect>, Debug<rusqlite::Error>> {
+) -> Result<Flash<Redirect>, Debug<QuotesError>> {
     let form = form.into_inner();
     let username = form.username;
-    match db
+    let user = db
         .run(move |conn| db::user_for_login(conn, &username))
-        .await
-    {
+        .await;
+    match user {
         Ok(user) => {
-            if verify(&user.password_hash, form.password.as_bytes()) {
+            let password = form.password.as_bytes().to_owned();
+            let password_hash = user.password_hash.clone();
+            let valid = tokio::task::spawn_blocking(move || verify(&password_hash, &password))
+                .await
+                .map_err(QuotesError::from)?;
+
+            if valid {
                 let cookie = Cookie::build(QUOTES_SESSION, user.id.to_string())
                     .path("/")
                     .secure(SECURE_COOKIE)
@@ -95,7 +115,7 @@ async fn do_login(
         Err(rusqlite::Error::QueryReturnedNoRows) => {
             Ok(Flash::error(Redirect::to(uri!(login)), "Invalid password."))
         }
-        Err(err) => Err(err.into()),
+        Err(err) => Err(QuotesError::from(err).into()),
     }
 }
 
@@ -112,16 +132,9 @@ fn login_user(_user: AuthenticatedUser) -> Redirect {
     Redirect::to(uri!(quotes::home))
 }
 
-#[derive(Serialize)]
-#[serde(crate = "rocket::serde")]
-struct LoginContext<'a, 'b> {
-    title: &'a str,
-    flash: Option<FlashMessage<'b>>,
-}
-
 #[get("/login", rank = 2)]
 pub fn login(flash: Option<FlashMessage<'_>>) -> Template {
-    let context = LoginContext {
+    let context = FlashContext {
         title: "Login",
         flash,
     };
@@ -130,4 +143,10 @@ pub fn login(flash: Option<FlashMessage<'_>>) -> Template {
 
 fn verify(hash: &str, password: &[u8]) -> bool {
     argon2::verify_encoded(hash, password).unwrap_or(false)
+}
+
+impl From<rusqlite::Error> for AuthenticatedUserError {
+    fn from(err: rusqlite::Error) -> Self {
+        AuthenticatedUserError::Database(err)
+    }
 }

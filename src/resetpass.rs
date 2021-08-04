@@ -158,8 +158,11 @@ pub async fn do_resetpass(
                     "Reset token expired",
                 ))
             } else {
-                let hash = hash_password(form.password.as_bytes())?; // TODO: spawn blocking
-                                                                     // Update the user's password and burn the token
+                let password = form.password.as_bytes().to_owned();
+                let hash = tokio::task::spawn_blocking(move || hash_password(&password))
+                    .await
+                    .map_err(QuotesError::from)??;
+                // Update the user's password and burn the token
                 let rows_updated = db
                     .run(move |conn| db::set_password(conn, user.id, &hash))
                     .await

@@ -55,7 +55,7 @@ pub async fn home(
     Ok(Template::render(
         "home",
         HomeContext {
-            title: String::from("Home"),
+            title: String::from("View Quotes"),
             users: rows,
             current_user,
         },

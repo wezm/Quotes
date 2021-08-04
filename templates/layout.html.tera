@@ -13,5 +13,8 @@
     <h2>{{ title }}</h2>
     {% include "flash" %}
     {% block content %}{% endblock content %}
+    <footer>
+      Quotes 3.0 ({{ get_env(name="QUOTES_REVISION", default="dev") }}) <a href="https://github.com/wezm/Quotes">Source code and issues on GitHub</a>.
+    </footer>
   </body>
 </html>

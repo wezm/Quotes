@@ -62,6 +62,12 @@ small
 	font-size: 9pt;
 }
 
+footer {
+    margin-top: 1em;
+    text-align: center;
+    font-size: 10pt;
+}
+
 .page_header
 {
     background-color: #ADADAD;

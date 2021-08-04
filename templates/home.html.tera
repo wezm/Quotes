@@ -2,7 +2,6 @@
 {% import "macros" as macros %}
 
 {% block content %}
-    <H2>View Quotes</H2>
     <TABLE cellspacing=1 cellpadding=3 border=0 bgcolor="#172530" width="80%">
         <TR bgcolor="white">
             <TH align="left">User</TH><TH>Quotes</TH><TH align="left">Last Quoted</TH>

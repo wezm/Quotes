@@ -42,6 +42,8 @@ pub enum QuotesError {
     DataBase(rusqlite::Error),
     Task(tokio::task::JoinError),
     Email(mailgun_sdk::ClientError),
+    Random(getrandom::Error),
+    Password(argon2::Error),
 }
 
 impl From<rusqlite::Error> for QuotesError {
@@ -62,12 +64,26 @@ impl From<mailgun_sdk::ClientError> for QuotesError {
     }
 }
 
+impl From<getrandom::Error> for QuotesError {
+    fn from(err: getrandom::Error) -> Self {
+        QuotesError::Random(err)
+    }
+}
+
+impl From<argon2::Error> for QuotesError {
+    fn from(err: argon2::Error) -> Self {
+        QuotesError::Password(err)
+    }
+}
+
 impl fmt::Display for QuotesError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
             QuotesError::DataBase(err) => err.fmt(f),
             QuotesError::Task(err) => err.fmt(f),
             QuotesError::Email(err) => err.fmt(f),
+            QuotesError::Random(err) => err.fmt(f),
+            QuotesError::Password(err) => err.fmt(f),
         }
     }
 }

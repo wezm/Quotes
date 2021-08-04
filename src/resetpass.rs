@@ -9,7 +9,7 @@ use rocket::{Route, State};
 use rocket_dyn_templates::Template;
 
 use crate::db::{self, QuotesDb};
-use crate::{auth, email, quotes, QuotesConfig};
+use crate::{auth, email, quotes, QuotesConfig, QuotesError};
 use auth::FlashContext;
 
 pub const TOKEN_VALIDITY_DURATION: std::time::Duration = std::time::Duration::from_secs(10 * 60); // 10 mins
@@ -137,7 +137,7 @@ pub struct ResetPassForm {
 pub async fn do_resetpass(
     db: QuotesDb,
     form: Form<ResetPassForm>,
-) -> Result<Flash<Redirect>, Debug<rusqlite::Error>> {
+) -> Result<Flash<Redirect>, Debug<QuotesError>> {
     let form = form.into_inner();
     let token = form.token;
     match db
@@ -158,19 +158,12 @@ pub async fn do_resetpass(
                     "Reset token expired",
                 ))
             } else {
-                let hash = match hash_password(form.password.as_bytes()) {
-                    Ok(hash) => hash,
-                    Err(err) => {
-                        return Ok(Flash::error(
-                            Redirect::to(uri!(auth::login)),
-                            format!("Unable to set password: {}", err),
-                        ))
-                    }
-                };
-                // Update the user's password and burn the token
+                let hash = hash_password(form.password.as_bytes())?; // TODO: spawn blocking
+                                                                     // Update the user's password and burn the token
                 let rows_updated = db
                     .run(move |conn| db::set_password(conn, user.id, &hash))
-                    .await?;
+                    .await
+                    .map_err(QuotesError::from)?;
 
                 if rows_updated > 0 {
                     Ok(Flash::success(
@@ -189,11 +182,11 @@ pub async fn do_resetpass(
             Redirect::to(uri!(auth::login)),
             "Token invalid or already used",
         )),
-        Err(err) => Err(err.into()),
+        Err(err) => Err(QuotesError::from(err).into()),
     }
 }
 
-fn hash_password(password: &[u8]) -> Result<String, Box<dyn std::error::Error>> {
+fn hash_password(password: &[u8]) -> Result<String, QuotesError> {
     let mut salt = [0u8; 16];
     getrandom::getrandom(&mut salt)?;
     let config = argon2::Config::default();

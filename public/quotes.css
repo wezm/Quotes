@@ -44,19 +44,16 @@ th
 
 a:link
 { 
-    text-decoration: none;
     color: #0D2752;
 }
         
 a:visited
 {
-    text-decoration: none;
     color: #0A1E3F;
 }
           
 a:hover
 {
-    text-decoration: underline;
     color: #3F0000;
 }
 

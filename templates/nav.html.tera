@@ -1,18 +1,18 @@
     <DIV class="quotes_links">
-        Logged in as <?php echo $_SESSION['username'] ?><BR>
+        Logged in as {{ current_user.username }}<BR>
         <SPAN class="quotes_links seperator">~</SPAN>
         {# <?php if($_SESSION['username'] != "Administrator") { ?> #}
         <A href="/">Quotes Home</A>
         <SPAN class="quotes_links seperator">&middot;</SPAN>
-        <A href="<?php echo $_SERVER[SCRIPT_NAME] ?>?page=quotes&action=viewquotes">View All</A>
+        <A href="/viewquotes">View All</A>
         <SPAN class="quotes_links seperator">&middot;</SPAN>
-        <A href="<?php echo $_SERVER[SCRIPT_NAME] ?>?page=quotes&action=addquote">Add Quote</A>
+        <A href="/addquote">Add Quote</A>
         <SPAN class="quotes_links seperator">&middot;</SPAN>
-        <A href="<?php echo $_SERVER[SCRIPT_NAME] ?>?page=quotes&action=viewprofile&ofuser=<?php echo $_SESSION['username'] ?>">Manage Profile</A>
+        <A href="/user/{{ current_user.username }}">Manage Profile</A>
         {# <?php } else { ?> #}
         {# <A href="<?php echo $_SERVER[SCRIPT_NAME] ?>?page=quotes">Admin Page</A> #}
         {# <?php } ?> #}
         <SPAN class="quotes_links seperator">&middot;</SPAN>
-        <A href="<?php echo $_SERVER[SCRIPT_NAME] ?>?page=quotes&action=logout">Logout</A>
+        <A href="/logout">Logout</A>
         <SPAN class="quotes_links seperator">~</SPAN>
     </DIV>

@@ -1,6 +1,7 @@
 //! User authentication.
 
 // TODO: Refresh session cookie on new requests
+use std::collections::HashMap;
 use std::time::{SystemTime, UNIX_EPOCH};
 
 use rocket::form::Form;
@@ -25,9 +26,9 @@ pub const SECURE_COOKIE: bool = false;
 #[cfg(not(debug_assertions))]
 pub const SECURE_COOKIE: bool = true;
 
-pub struct AuthenticatedUser {
-    pub user: UserRow,
-}
+#[derive(Serialize)]
+#[serde(crate = "rocket::serde")]
+pub struct AuthenticatedUser(UserRow);
 
 #[derive(FromForm)]
 struct LoginForm {
@@ -67,7 +68,7 @@ impl<'r> FromRequest<'r> for AuthenticatedUser {
 
         db.run(move |conn| db::get_user(conn, user_id))
             .await
-            .map(|user| AuthenticatedUser { user })
+            .map(AuthenticatedUser)
             .or_forward(())
     }
 }
@@ -109,10 +110,12 @@ async fn do_login(
     }
 }
 
-#[post("/logout")]
-fn logout(cookies: &CookieJar<'_>) -> Flash<Redirect> {
+#[get("/logout")]
+fn logout(cookies: &CookieJar<'_>) -> Template {
     cookies.remove_private(Cookie::named(QUOTES_SESSION));
-    Flash::success(Redirect::to(uri!(login)), "Successfully logged out.")
+    let mut context = HashMap::new();
+    context.insert("title", "Goodbye");
+    Template::render("logout", context)
 }
 
 #[get("/login")]
@@ -262,7 +265,6 @@ pub struct ResetPassForm {
 pub async fn do_resetpass(
     db: QuotesDb,
     form: Form<ResetPassForm>,
-    flash: Option<FlashMessage<'_>>,
 ) -> Result<Flash<Redirect>, Debug<rusqlite::Error>> {
     let form = form.into_inner();
     let token = form.token;

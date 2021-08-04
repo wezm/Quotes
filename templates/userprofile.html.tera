@@ -2,8 +2,6 @@
 {% import "macros" as macros %}
 
 {% block content %}
-<H2>{{ username }}'s Profile</H2>
-
 {# Generate the user details #}
 <TABLE cellspacing=1 cellpadding=5 border=0 bgcolor="gray">
     {% for row in rows %}

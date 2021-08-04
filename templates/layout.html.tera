@@ -6,7 +6,9 @@
     <link rel="stylesheet" type="text/css" href="/public/quotes.css" />
   </head>
   <body>
-    {% include "nav" %}
+    {% if current_user %}
+      {% include "nav" %}
+    {% endif %}
 
     <h2>{{ title }}</h2>
     {% include "flash" %}

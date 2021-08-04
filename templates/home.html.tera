@@ -21,7 +21,7 @@
         {# Fill in details #}
         {# User name #}
         <TD>
-            <A href="/{{ user.username }}/quotes">{{ user.username }}</A>
+            <A href="/quotes/{{ user.username }}">{{ user.username }}</A>
         </TD>
 
         {# Quote count #}
@@ -47,9 +47,9 @@
         </TD>
 
         <TD align="center">
-            <A href="/{{ user.username }}" title="View Profile">
+            <A href="/user/{{ user.username }}" title="View Profile">
             <IMG src="/public/profileicon.gif" width=16 height=16 border=0></A>
-            <A href="/{{ user.username }}/quotes/new" title="Add Quote">
+            <A href="/quotes/{{ user.username }}/new" title="Add Quote">
             <IMG src="/public/newquoteicon.gif" width=16 height=16 border=0></A>
         </TD>
 

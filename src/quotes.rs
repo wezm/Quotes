@@ -25,16 +25,20 @@ pub fn routes() -> Vec<Route> {
 #[derive(Serialize)]
 #[serde(crate = "rocket::serde")]
 struct HomeContext {
+    title: String,
     users: Vec<HomeRow>,
+    current_user: AuthenticatedUser,
 }
 
 #[derive(Serialize)]
 #[serde(crate = "rocket::serde")]
 struct QuotesContext {
+    title: String,
     username: String,
     users: HashMap<String, UserRow>,
     quotes: Vec<QuoteRow>,
     ratings: HashMap<i64, Vec<i64>>,
+    current_user: AuthenticatedUser,
 }
 
 #[get("/", rank = 2)]
@@ -48,14 +52,23 @@ pub async fn home(
     db: QuotesDb,
 ) -> Result<Template, Debug<rusqlite::Error>> {
     let rows = db.run(|conn| db::home_query(conn)).await?;
-    Ok(Template::render("home", HomeContext { users: rows }))
+    Ok(Template::render(
+        "home",
+        HomeContext {
+            title: String::from("Home"),
+            users: rows,
+            current_user,
+        },
+    ))
 }
 
 #[derive(Serialize)]
 #[serde(crate = "rocket::serde")]
 struct ProfileContext {
+    title: String,
     username: String,
     rows: Vec<ProfileRow>,
+    current_user: AuthenticatedUser,
 }
 
 #[derive(Serialize)]
@@ -65,8 +78,8 @@ struct ProfileRow {
     value: String,
 }
 
-#[get("/user/<username>", rank = 2)]
-fn profile_redirect(username: String) -> Redirect {
+#[get("/user/<_username>", rank = 2)]
+fn profile_redirect(_username: String) -> Redirect {
     Redirect::to(uri!(auth::login))
 }
 
@@ -207,12 +220,17 @@ async fn profile(
 
     Ok(Template::render(
         "userprofile",
-        ProfileContext { username, rows },
+        ProfileContext {
+            title: format!("{}'s Profile", username),
+            username,
+            rows,
+            current_user,
+        },
     ))
 }
 
-#[get("/quotes/<username>", rank = 2)]
-fn quotes_redirect(username: String) -> Redirect {
+#[get("/quotes/<_username>", rank = 2)]
+fn quotes_redirect(_username: String) -> Redirect {
     Redirect::to(uri!(auth::login))
 }
 
@@ -238,10 +256,12 @@ async fn quotes(
     Ok(Template::render(
         "quotes",
         QuotesContext {
+            title: format!("{}'s quotes", username),
             username,
             users,
             quotes,
             ratings,
+            current_user,
         },
     ))
 }

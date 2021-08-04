@@ -1,12 +1,7 @@
 {% extends "layout" %}
 
 {% block content %}
-  {% if expired %}
-    <p>
-      That token has expired, please
-      <a href="/forgotpass">request a new one</a>.
-    </p>
-  {% else %}
+  {% if token %}
     <form action="/resetpass" method="POST">
         <p>Enter your new password below.</p>
 
@@ -17,5 +12,10 @@
           <input type="submit" value="Change Password">
         </p>
     </form>
+  {% else %}
+    <p>
+      That token is invalid or has expired, please
+      <a href="/forgotpass">request a new one</a>.
+    </p>
   {% endif %}
 {% endblock content %}

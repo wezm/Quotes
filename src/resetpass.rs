@@ -87,8 +87,7 @@ async fn do_forgotpass(
 struct ResetPassContext<'a, 'b> {
     title: &'a str,
     flash: Option<FlashMessage<'b>>,
-    token: &'a str,
-    expired: bool,
+    token: Option<&'a str>,
 }
 
 #[get("/resetpass?<token>")]
@@ -115,13 +114,17 @@ pub async fn resetpass(
             let context = ResetPassContext {
                 title: "Set Password",
                 flash,
-                token: &token,
-                expired,
+                token: if expired { None } else { Some(&token) },
             };
             Ok(Template::render("setpass", context))
         }
-        Err(err @ rusqlite::Error::QueryReturnedNoRows) => {
-            Err(err.into()) // FIXME: 404 or something in this case
+        Err(rusqlite::Error::QueryReturnedNoRows) => {
+            let context = ResetPassContext {
+                title: "Set Password",
+                flash,
+                token: None,
+            };
+            Ok(Template::render("setpass", context))
         }
         Err(err) => Err(err.into()),
     }

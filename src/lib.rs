@@ -1,8 +1,11 @@
 #[macro_use]
 extern crate rocket;
 
+use rocket::serde::Deserialize;
+
 pub mod auth;
 pub mod db;
+mod email;
 pub mod quotes;
 
 /// Error returned by most functions.
@@ -22,3 +25,11 @@ pub type Error = Box<dyn std::error::Error + Send + Sync>;
 ///
 /// This is defined as a convenience.
 pub type Result<T, E = Error> = std::result::Result<T, E>;
+
+#[derive(Deserialize)]
+#[serde(crate = "rocket::serde")]
+pub struct QuotesConfig {
+    pub mailgun_api_key: String,
+    pub mailgun_domain: String,
+    pub send_emails: bool,
+}

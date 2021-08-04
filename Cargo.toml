@@ -8,7 +8,9 @@ default-run = "quotes"
 
 [dependencies]
 chrono = {version = "0.4.1", default-features = false, features = ["std", "clock"]} # needs to match tera
+getrandom = "0.2.3"
 gumdrop = "0.8.0"
+mailgun-sdk = "0.1.1"
 refinery = { version = "0.6", features = ["rusqlite"] }
 rocket = { version = "0.5.0-rc.1", features = ["secrets"] }
 rusqlite = "0.25.3"

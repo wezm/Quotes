@@ -2,6 +2,7 @@ use std::collections::HashMap;
 
 use rocket::serde::Serialize;
 use rocket_sync_db_pools::{database, rusqlite};
+use rusqlite::named_params;
 
 use crate::Result;
 
@@ -161,6 +162,7 @@ pub fn quote_raters(
 pub struct UserRow {
     pub id: i64,
     pub username: String,
+    pub email: String,
     pub firstname: String,
     pub surname: String,
     pub last_posted: Option<u32>,
@@ -172,6 +174,7 @@ pub fn get_user(conn: &mut rusqlite::Connection, user_id: i64) -> Result<UserRow
     SELECT \
         id,
         username,
+        email,
         firstname,
         surname,
         last_posted,
@@ -184,10 +187,80 @@ pub fn get_user(conn: &mut rusqlite::Connection, user_id: i64) -> Result<UserRow
         Ok(UserRow {
             id: row.get(0)?,
             username: row.get(1)?,
-            firstname: row.get(2)?,
-            surname: row.get(3)?,
-            last_posted: row.get(4)?,
-            favourite_quote_id: row.get(5)?,
+            email: row.get(2)?,
+            firstname: row.get(3)?,
+            surname: row.get(4)?,
+            last_posted: row.get(5)?,
+            favourite_quote_id: row.get(6)?,
+        })
+    })
+}
+
+pub fn get_user_by_username(
+    conn: &mut rusqlite::Connection,
+    username: &str,
+) -> Result<UserRow, rusqlite::Error> {
+    let sql = "\
+    SELECT \
+        id,
+        username,
+        email,
+        firstname,
+        surname,
+        last_posted,
+        favourite_quote_id
+    FROM users \
+    WHERE username = ?";
+    let mut stmt = conn.prepare_cached(sql)?;
+
+    stmt.query_row([username], |row| {
+        Ok(UserRow {
+            id: row.get(0)?,
+            username: row.get(1)?,
+            email: row.get(2)?,
+            firstname: row.get(3)?,
+            surname: row.get(4)?,
+            last_posted: row.get(5)?,
+            favourite_quote_id: row.get(6)?,
+        })
+    })
+}
+
+#[derive(Serialize)]
+#[serde(crate = "rocket::serde")]
+pub struct UserRowSetPass {
+    pub id: i64,
+    pub username: String,
+    pub email: String,
+    pub firstname: String,
+    pub surname: String,
+    pub reset_token_expires: Option<u64>,
+}
+
+pub fn get_user_by_reset_token(
+    conn: &mut rusqlite::Connection,
+    token: &str,
+) -> Result<UserRowSetPass, rusqlite::Error> {
+    let sql = "\
+    SELECT \
+        id,
+        username,
+        email,
+        firstname,
+        surname,
+        reset_token_expires
+    FROM users \
+    WHERE reset_token = ?";
+    let mut stmt = conn.prepare_cached(sql)?;
+
+    stmt.query_row([token], |row| {
+        Ok(UserRowSetPass {
+            id: row.get(0)?,
+            username: row.get(1)?,
+            email: row.get(2)?,
+            firstname: row.get(3)?,
+            surname: row.get(4)?,
+            reset_token_expires: row.get(5)?,
         })
     })
 }
@@ -199,6 +272,7 @@ pub fn user_map(
     SELECT \
         id,
         username,
+        email,
         firstname,
         surname,
         last_posted,
@@ -213,10 +287,11 @@ pub fn user_map(
         let user = UserRow {
             id: row.get(0)?,
             username: username.clone(),
-            firstname: row.get(2)?,
-            surname: row.get(3)?,
-            last_posted: row.get(4)?,
-            favourite_quote_id: row.get(5)?,
+            email: row.get(2)?,
+            firstname: row.get(3)?,
+            surname: row.get(4)?,
+            last_posted: row.get(5)?,
+            favourite_quote_id: row.get(6)?,
         };
         results.insert(username, user);
     }
@@ -244,6 +319,33 @@ pub fn user_for_login(
             password_hash: row.get(1)?,
         })
     })
+}
+
+pub fn set_reset_token(
+    conn: &mut rusqlite::Connection,
+    user_id: i64,
+    token: &str,
+    expires: u64,
+) -> Result<usize, rusqlite::Error> {
+    let sql = "UPDATE users \
+    SET reset_token = :token, reset_token_expires = :expires \
+    WHERE id = :user_id";
+    let mut stmt = conn.prepare_cached(sql)?;
+
+    stmt.execute(named_params! { ":token": token, ":expires": expires, ":user_id": user_id })
+}
+
+pub fn set_password(
+    conn: &mut rusqlite::Connection,
+    user_id: i64,
+    password_hash: &str,
+) -> Result<usize, rusqlite::Error> {
+    let sql = "UPDATE users \
+    SET password_hash = :password, reset_token = NULL, reset_token_expires = NULL \
+    WHERE id = :user_id";
+    let mut stmt = conn.prepare_cached(sql)?;
+
+    stmt.execute(named_params! { ":password": password_hash, ":user_id": user_id })
 }
 
 pub fn quote_counts(conn: &mut rusqlite::Connection) -> Result<Vec<(i64, usize)>, rusqlite::Error> {

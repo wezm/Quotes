@@ -8,6 +8,7 @@ use rocket::{Build, Rocket};
 use rocket_dyn_templates::Template;
 
 use ::quotes::db::{self, QuotesDb};
+use ::quotes::QuotesConfig;
 use ::quotes::{auth, quotes};
 
 #[derive(Options)]
@@ -33,6 +34,7 @@ fn rocket() -> _ {
 
     rocket::build()
         .attach(db)
+        .attach(AdHoc::config::<QuotesConfig>())
         .attach(Template::fairing())
         .mount("/", auth::routes())
         .mount("/", quotes::routes())

@@ -9,7 +9,7 @@ use rocket_dyn_templates::Template;
 
 use ::quotes::db::{self, QuotesDb};
 use ::quotes::QuotesConfig;
-use ::quotes::{auth, quotes, resetpass};
+use ::quotes::{auth, quotes, resetpass, user};
 
 #[derive(Options)]
 struct Args {
@@ -39,6 +39,7 @@ fn rocket() -> _ {
         .mount("/", auth::routes())
         .mount("/", resetpass::routes())
         .mount("/", quotes::routes())
+        .mount("/", user::routes())
         .mount("/public", FileServer::from("public"))
 }
 

@@ -28,6 +28,7 @@ struct QuotesContext {
     username: String,
     users: HashMap<String, UserRow>,
     quotes: Vec<QuoteRow>,
+    highlight: Option<i64>,
     ratings: HashMap<i64, Vec<i64>>,
     current_user: AuthenticatedUser,
 }
@@ -58,11 +59,12 @@ fn quotes_redirect(_username: String) -> Redirect {
     Redirect::to(uri!(auth::login))
 }
 
-#[get("/quotes/<username>")]
+#[get("/quotes/<username>?<highlight>")]
 async fn quotes(
     current_user: AuthenticatedUser,
     db: QuotesDb,
     username: String,
+    highlight: Option<i64>
 ) -> Result<Template, NotFound<&'static str>> {
     let users = db.run(|conn| db::user_map(conn)).await.expect("FIXME");
     let user_id = match users.get(&username) {
@@ -84,6 +86,7 @@ async fn quotes(
             username,
             users,
             quotes,
+            highlight,
             ratings,
             current_user,
         },

@@ -3,7 +3,7 @@
 
 {% block content %}
 {# Displays a quote table for a user #}
-<TABLE cellspacing=1 cellpadding=3 border=0 bgcolor="gray" width="100%">
+<TABLE class="quotes-table" cellspacing=1 border=0 bgcolor="gray" width="100%">
     <TR bgcolor="white">
         <TD colspan=4 align="right">
             <A href="/user/{{ username }}">
@@ -13,15 +13,7 @@
             </A>
         </TD>
     </TR>
-    {#
-    if(!empty($_GET['highlight'])) {
-        // There is a highlight id
-        $highlight = $_GET['highlight'];
-    } else {
-        $highlight = 0;
-    }
-    #}
-    {% set highlight = 0 %}
+    {% set highlight = highlight | default(value=0) %}
 
     {# Build table contents #}
     {% for quote in quotes %}
@@ -41,19 +33,17 @@
         {# The quote #}
 
         <TD><A name="quote{{ quote.id }}"></a>
-        <SPAN class="quote">
         {# if(isset($qlinked)) { #}
             {# <A href="$_SERVER[SCRIPT_NAME]?page=quotes&action=setfav&ref=$currentID"> #}
         {# } #}
 
-        {{ quote.quote_body | striptags }}
+        <a href="/quotes/{{ username }}?highlight={{ quote.id }}#quote{{ quote.id }}" class="quote">{{ quote.quote_body | striptags }}</a>
 
         {# if(isset($qlinked)) { #}
             {# </A> #}
         {# } #}
 
-        </SPAN>
-                </TD>
+        </TD>
 
         {# Quote poster and date #}
         <TD width=150>
@@ -67,7 +57,7 @@
         <TD width=30 align="center">
         {% if quote.parent_quote_id %}
             {# This quote has a response, use the lightning icon #}
-            <A href="/user/{{ quote.parent_quote_username }}/quotes?highlight={{ quote.parent_quote_id }}#quote{{ quote.parent_quote_id }}">
+            <A href="/quotes/{{ quote.parent_quote_username }}?highlight={{ quote.parent_quote_id }}#quote{{ quote.parent_quote_id }}">
             <IMG src="/public/lightning.gif" border=0></A>
         {% else %}
             {# This quote has no response, use the pencil icon #}

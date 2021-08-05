@@ -229,10 +229,16 @@ footer {
 .caption { font-size: 8pt;
            font-weight: bold; }
 
-.quote
+a.quote
 {
 	font-family: serif;
 	font-style: italic;
+        color: black;
+        text-decoration: none;
+}
+
+a.quote:hover {
+  text-decoration: underline;
 }
 
 .error
@@ -276,4 +282,8 @@ TR.news_content { background-color: #446D8C; }
 .flash-error {
     border-color: red;
     background-color: hsl(0, 100%, 90%);
+}
+
+.quotes-table td {
+  padding: 3px 7px;
 }

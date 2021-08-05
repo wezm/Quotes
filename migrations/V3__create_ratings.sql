@@ -1,0 +1,7 @@
+CREATE TABLE IF NOT EXISTS "ratings"
+(
+    "id"       INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+    "quote_id" INTEGER NOT NULL,
+    "user_id"  INTEGER NOT NULL
+);
+

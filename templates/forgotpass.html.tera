@@ -1,0 +1,13 @@
+{% extends "layout" %}
+
+{% block content %}
+    <form action="/forgotpass" method="POST">
+        <p>Enter your username, an email will be sent with a password reset link.</p>
+
+        <p>
+          <label for="username">Username:</label>
+          <input type="text" name="username" id="username" size=8>
+          <input type="submit" value="Submit">
+        </p>
+    </form>
+{% endblock content %}

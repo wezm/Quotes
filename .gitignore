@@ -1,7 +1,4 @@
 quotes.db
-frontend/*
-backend/*
-config.yml
 sample_quotes.db
-.bundle/*
-.rvmrc
+/target
+/Rocket.toml

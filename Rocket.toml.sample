@@ -1,0 +1,9 @@
+[default]
+mailgun_api_key = "key"
+mailgun_domain = "example.com"
+send_emails = false
+secret_key = "" # Generate with openssl rand -base64 32
+
+[global.databases]
+quotes_db = { url = "quotes_dev.db" }
+

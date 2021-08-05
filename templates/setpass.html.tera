@@ -1,0 +1,21 @@
+{% extends "layout" %}
+
+{% block content %}
+  {% if token %}
+    <form action="/resetpass" method="POST">
+        <p>Enter your new password below.</p>
+
+        <p>
+          <label for="password">New Password:</label>
+          <input type="password" name="password" id="password" size=8>
+          <input type="hidden" name="token" value="{{ token }}">
+          <input type="submit" value="Change Password">
+        </p>
+    </form>
+  {% else %}
+    <p>
+      That token is invalid or has expired, please
+      <a href="/forgotpass">request a new one</a>.
+    </p>
+  {% endif %}
+{% endblock content %}

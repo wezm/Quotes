@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Quotes - {{ title }}</title>
+    <link rel="stylesheet" type="text/css" href="/public/quotes.css" />
+    <link rel="icon" href="data:image/svg+xml,&lt;svg xmlns=&quot;http://www.w3.org/2000/svg&quot; viewBox=&quot;0 0 100 100&quot;&gt;&lt;text y=&quot;.9em&quot; font-size=&quot;90&quot;&gt;💬&lt;/text&gt;&lt;/svg&gt;"/>
+  </head>
+  <body>
+    <div class="wrapper">
+      {% if current_user %}
+        {% include "nav" %}
+      {% endif %}
+
+      <main>
+        <h2>{{ title }}</h2>
+        {% include "flash" %}
+        {% block content %}{% endblock content %}
+      </main>
+
+      <footer>
+        Quotes 3.0 ({{ get_env(name="QUOTES_REVISION", default="dev") }}) <a href="https://github.com/wezm/Quotes">Source code and issues on GitHub</a>.
+      </footer>
+    </div>
+  </body>
+</html>

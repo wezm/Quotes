@@ -1,0 +1,51 @@
+{% extends "layout" %}
+{% import "macros" as macros %}
+
+{% block content %}
+{# Generate the user details #}
+<TABLE cellspacing=1 cellpadding=5 border=0 bgcolor="gray">
+    {% for row in rows %}
+        {% if loop.index0 is divisibleby(2) %}
+            {# Even row #}
+            <TR bgcolor="white">
+        {% else %}
+            {# Odd row #}
+            <TR bgcolor="#e6eaff">
+        {% endif %}
+            <TD align="right">
+                <B>{{ row.label | safe }}</B>
+            </TD>
+            <TD>{{ row.value | safe }}</TD>
+        </TR>
+    {% endfor %}
+</TABLE>
+
+{# if($ofuser == $thisuser) { #}
+{% if false %}
+{# Include options to change password #}
+<FORM action="$_SERVER[SCRIPT_NAME]?page=quotes" method="POST">
+
+    <H3>Change Password</H3>
+    Complete this form if you wish to change your password.
+    <P>
+    <TABLE border=0>
+        <TR>
+            <TD align="right">Current password:</TD>
+            <TD><INPUT type="password" name="old" size=8></TD>
+        </TR>
+        <TR>
+            <TD align="right">New Password:</TD>
+            <TD><INPUT type="password" name="new" size=8><BR></TD>
+        </TR>
+        <TR>
+            <TD align="right">Confirm New Password:</TD>
+            <TD><INPUT type="password" name="confirm" size=8><BR></TD>
+        </TR>
+        <TR>
+            <TD colspan=2 align="right"><INPUT type="submit" value="Change Password"></TD>
+        </TR>
+    </TABLE>
+    <INPUT type="hidden" name="action" value="passwd">
+</FORM>
+{% endif %}
+{% endblock content %}

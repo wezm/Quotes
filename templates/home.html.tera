@@ -1,0 +1,61 @@
+{% extends "layout" %}
+{% import "macros" as macros %}
+
+{% block content %}
+    <TABLE cellspacing=1 cellpadding=3 border=0 bgcolor="#172530" width="80%">
+        <TR bgcolor="white">
+            <TH align="left">User</TH><TH>Quotes</TH><TH align="left">Last Quoted</TH>
+            <TH align="left">Last Posted</TH><TH>Action</TD>
+        </TR>
+    {# Build table contents #}
+    {% for user in users %}
+        {% if loop.index0 is divisibleby(2) %}
+            {# Even row #}
+            <TR bgcolor="#e6eaff">
+        {% else %}
+            {# Odd row #}
+            <TR bgcolor="white">
+        {% endif %}
+
+        {# Fill in details #}
+        {# User name #}
+        <TD>
+            <A href="/quotes/{{ user.username }}">{{ user.username }}</A>
+        </TD>
+
+        {# Quote count #}
+        <TD align="center">{{ user.quote_count }}</TD>
+
+        {# Last Quoted #}
+        <TD>
+        {% if user.last_quoted %}
+            {# User has at least 1 quote #}
+            {{ macros::html_date(timestamp=user.last_quoted) }}
+        {% else %}
+            Never
+        {% endif %}
+        </TD>
+
+        {# Last Posted #}
+        <TD>
+        {% if user.last_posted %}
+            {{ macros::html_date(timestamp=user.last_posted) }}
+        {% else %}
+            Never
+        {% endif %}
+        </TD>
+
+        <TD align="center">
+            <A href="/user/{{ user.username }}" title="View Profile">
+            <IMG src="/public/profileicon.gif" width=16 height=16 border=0></A>
+            <A href="/quotes/{{ user.username }}/new" title="Add Quote">
+            <IMG src="/public/newquoteicon.gif" width=16 height=16 border=0></A>
+        </TD>
+
+        {# End of row #}
+        </TR>
+    {% endfor %}
+
+    {# End of TABLE #}
+    </TABLE>
+{% endblock content %}

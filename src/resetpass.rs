@@ -120,7 +120,7 @@ pub async fn resetpass(
         }
         Err(rusqlite::Error::QueryReturnedNoRows) => {
             let context = ResetPassContext {
-                title: "Set Password",
+                title: "Invalid Token",
                 flash,
                 token: None,
             };

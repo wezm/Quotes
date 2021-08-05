@@ -2,14 +2,14 @@ use std::borrow::Cow;
 use std::collections::HashMap;
 
 use chrono::NaiveDateTime;
-use rocket::response::status::NotFound;
-use rocket::response::Redirect;
+use rocket::response::{Debug, Redirect};
 use rocket::serde::Serialize;
 use rocket::Route;
 use rocket_dyn_templates::{tera, Template};
 
 use crate::auth::{self, AuthenticatedUser};
 use crate::db::{self, QuoteRow, QuotesDb, UserRow};
+use crate::QuotesError;
 
 pub fn routes() -> Vec<Route> {
     routes![profile, profile_redirect,]
@@ -50,19 +50,21 @@ async fn profile(
     current_user: AuthenticatedUser,
     db: QuotesDb,
     username: String,
-) -> Result<Template, NotFound<&'static str>> {
-    let user_map: HashMap<String, UserRow> =
-        db.run(|conn| db::user_map(conn)).await.expect("FIXME");
+) -> Result<Option<Template>, Debug<QuotesError>> {
+    let user_map: HashMap<String, UserRow> = db
+        .run(|conn| db::user_map(conn))
+        .await
+        .map_err(QuotesError::from)?;
     let users = user_map.values().collect::<Vec<_>>();
     let user = match user_map.get(&username) {
         Some(user) => user,
-        None => return Err(NotFound("User not found")),
+        None => return Ok(None),
     };
     let user_id = user.id;
     let quote_counts = db
         .run(move |conn| db::quote_counts(conn))
         .await
-        .expect("FIXME");
+        .map_err(QuotesError::from)?;
     let pos = quote_counts
         .iter()
         .position(|(uid, _count)| *uid == user_id);
@@ -74,13 +76,13 @@ async fn profile(
     let self_quotes = db
         .run(move |conn| db::self_quote_count(conn, user_id))
         .await
-        .expect("FIXME self quote count");
+        .map_err(QuotesError::from)?;
     rows.push(ProfileRow::new("Self Quotes", self_quotes));
 
     let post_count = db
         .run(move |conn| db::user_post_count(conn, user_id))
         .await
-        .expect("FIXME user post count");
+        .map_err(QuotesError::from)?;
     rows.push(ProfileRow::new("Total Posts", post_count));
 
     rows.push(ProfileRow::new(
@@ -133,7 +135,7 @@ async fn profile(
     let average_rating = db
         .run(move |conn| db::average_rating(conn, user_id))
         .await
-        .expect("FIXME average rating");
+        .map_err(QuotesError::from)?;
     rows.push(ProfileRow::new(
         "Average Rating",
         format!("{:.2}", average_rating),
@@ -143,7 +145,7 @@ async fn profile(
     let fav_quote = if let Some(fav_quote_id) = user.favourite_quote_id {
         db.run(move |conn| db::get_quote(conn, fav_quote_id))
             .await
-            .expect("FIXME get quote")
+            .map_err(QuotesError::from)?
             .map(|quote: QuoteRow| {
                 let quote_user = users
                     .iter()
@@ -165,7 +167,7 @@ async fn profile(
     let last_quoted_at = db
         .run(move |conn| db::last_quoted(conn, user_id))
         .await
-        .expect("FIXME last quoted");
+        .map_err(QuotesError::from)?;
     let last_quoted = if let Some(timestamp) = last_quoted_at {
         html_date(timestamp)
     } else {
@@ -180,7 +182,7 @@ async fn profile(
     };
     rows.push(ProfileRow::new("Last Post", last_posted));
 
-    Ok(Template::render(
+    Ok(Some(Template::render(
         "userprofile",
         ProfileContext {
             title: format!("{}'s Profile", username),
@@ -188,7 +190,7 @@ async fn profile(
             rows,
             current_user,
         },
-    ))
+    )))
 }
 
 fn ordinal(num: usize) -> &'static str {

@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 
-use rocket::response::status::NotFound;
+use rocket::request::FlashMessage;
 use rocket::response::{Debug, Redirect};
 use rocket::serde::Serialize;
 use rocket::Route;
@@ -15,16 +15,18 @@ pub fn routes() -> Vec<Route> {
 
 #[derive(Serialize)]
 #[serde(crate = "rocket::serde")]
-struct HomeContext {
+struct HomeContext<'f> {
     title: String,
+    flash: Option<FlashMessage<'f>>,
     users: Vec<HomeRow>,
     current_user: AuthenticatedUser,
 }
 
 #[derive(Serialize)]
 #[serde(crate = "rocket::serde")]
-struct QuotesContext {
+struct QuotesContext<'f> {
     title: String,
+    flash: Option<FlashMessage<'f>>,
     username: String,
     users: HashMap<String, UserRow>,
     quotes: Vec<QuoteRow>,
@@ -42,12 +44,14 @@ fn home_redirect() -> Redirect {
 pub async fn home(
     current_user: AuthenticatedUser,
     db: QuotesDb,
+    flash: Option<FlashMessage<'_>>,
 ) -> Result<Template, Debug<rusqlite::Error>> {
     let rows = db.run(|conn| db::home_query(conn)).await?;
     Ok(Template::render(
         "home",
         HomeContext {
             title: String::from("View Quotes"),
+            flash,
             users: rows,
             current_user,
         },
@@ -64,25 +68,21 @@ async fn quotes(
     current_user: AuthenticatedUser,
     db: QuotesDb,
     username: String,
-    highlight: Option<i64>
-) -> Result<Template, NotFound<&'static str>> {
-    let users = db.run(|conn| db::user_map(conn)).await.expect("FIXME");
+    highlight: Option<i64>,
+    flash: Option<FlashMessage<'_>>,
+) -> Result<Option<Template>, Debug<rusqlite::Error>> {
+    let users = db.run(|conn| db::user_map(conn)).await?;
     let user_id = match users.get(&username) {
         Some(user) => user.id,
-        None => return Err(NotFound("User not found")),
+        None => return Ok(None),
     };
-    let quotes = db
-        .run(move |conn| db::user_quotes(conn, user_id))
-        .await
-        .expect("FIXME");
-    let ratings = db
-        .run(move |conn| db::quote_raters(conn, user_id))
-        .await
-        .expect("FIXME ratings");
-    Ok(Template::render(
+    let quotes = db.run(move |conn| db::user_quotes(conn, user_id)).await?;
+    let ratings = db.run(move |conn| db::quote_raters(conn, user_id)).await?;
+    Ok(Some(Template::render(
         "quotes",
         QuotesContext {
             title: format!("{}'s quotes", username),
+            flash,
             username,
             users,
             quotes,
@@ -90,5 +90,5 @@ async fn quotes(
             ratings,
             current_user,
         },
-    ))
+    )))
 }

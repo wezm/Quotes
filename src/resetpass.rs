@@ -206,7 +206,7 @@ fn generate_token() -> Result<String, getrandom::Error> {
     Ok(hexstring(&buf))
 }
 
-pub fn hexstring<'buf>(data: &[u8; 32]) -> String {
+pub fn hexstring(data: &[u8; 32]) -> String {
     let mut buf = vec![0; 64];
     for (i, byte) in data.iter().copied().enumerate() {
         buf[i * 2] = char::from_digit((u32::from(byte) & 0xF0) >> 4, 16).unwrap() as u8;

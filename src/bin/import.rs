@@ -205,7 +205,7 @@ fn read_profile(username: String, path: PathBuf) -> Result<User> {
 
     Ok(User {
         path,
-        username: username.to_owned(),
+        username,
         first_name,
         last_name,
         last_posted,

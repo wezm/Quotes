@@ -32,7 +32,7 @@ pub struct QuoteRow {
     pub parent_quote_username: Option<String>,
 }
 
-#[derive(Serialize)]
+#[derive(Serialize, Clone)]
 #[serde(crate = "rocket::serde")]
 pub struct UserRow {
     pub id: i64,

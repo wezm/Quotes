@@ -24,7 +24,7 @@ pub const SECURE_COOKIE: bool = false;
 #[cfg(not(debug_assertions))]
 pub const SECURE_COOKIE: bool = true;
 
-#[derive(Serialize)]
+#[derive(Serialize, Clone)]
 #[serde(crate = "rocket::serde")]
 pub struct AuthenticatedUser(UserRow);
 

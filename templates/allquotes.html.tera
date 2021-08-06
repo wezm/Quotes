@@ -2,7 +2,7 @@
 {% import "macros" as macros %}
 
 {% block content %}
-  {% for user in quotes %}
+  {% for user in quotes | sort(attribute="username") %}
     <h3>{{ user.title }}</h3>
     {{ macros::user_quotes(username=user.username, quotes=user.quotes, highlight=user.highlight, ratings=user.ratings) }}
   {% endfor %}

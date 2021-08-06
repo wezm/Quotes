@@ -1,10 +1,9 @@
 use std::collections::HashMap;
+use std::convert::TryFrom;
 
 use rocket::serde::Serialize;
 use rocket_sync_db_pools::{database, rusqlite};
-use rusqlite::named_params;
-
-use crate::Result;
+use rusqlite::{named_params, Row};
 
 // FIXME: Is 16 (the default) statements in the statement cache enough
 
@@ -18,6 +17,31 @@ pub struct HomeRow {
     pub quote_count: usize,
     pub last_quoted: Option<u64>,
     pub last_posted: Option<u64>,
+}
+
+#[derive(Serialize)]
+#[serde(crate = "rocket::serde")]
+pub struct QuoteRow {
+    pub id: i64,
+    pub user_id: i64,
+    pub quote_body: String,
+    pub created_at: Option<u32>,
+    pub poster_username: String,
+    pub rating: u32,
+    pub parent_quote_id: Option<i64>,
+    pub parent_quote_username: Option<String>,
+}
+
+#[derive(Serialize)]
+#[serde(crate = "rocket::serde")]
+pub struct UserRow {
+    pub id: i64,
+    pub username: String,
+    pub email: String,
+    pub firstname: String,
+    pub surname: String,
+    pub last_posted: Option<u32>,
+    pub favourite_quote_id: Option<i64>,
 }
 
 pub fn home_query(conn: &mut rusqlite::Connection) -> Result<Vec<HomeRow>, rusqlite::Error> {
@@ -42,17 +66,31 @@ pub fn home_query(conn: &mut rusqlite::Connection) -> Result<Vec<HomeRow>, rusql
     Ok(results)
 }
 
-#[derive(Serialize)]
-#[serde(crate = "rocket::serde")]
-pub struct QuoteRow {
-    pub id: i64,
-    pub user_id: i64,
-    pub quote_body: String,
-    pub created_at: Option<u32>,
-    pub poster_username: String,
-    pub rating: u32,
-    pub parent_quote_id: Option<i64>,
-    pub parent_quote_username: Option<String>,
+pub fn all_quotes(conn: &mut rusqlite::Connection) -> Result<Vec<QuoteRow>, rusqlite::Error> {
+    let sql = "\
+    SELECT \
+        quotes.id,
+        quotes.user_id,
+        quotes.quote_body,
+        quotes.created_at,
+        users.username AS poster_username,
+        quotes.rating,
+        quotes.parent_quote_id,
+        u2.username AS parent_quote_username
+    FROM quotes \
+    LEFT JOIN users ON (users.id = quotes.poster_id) \
+    LEFT JOIN quotes AS q2 ON (q2.id = quotes.parent_quote_id) \
+    LEFT JOIN users u2 ON (u2.id = q2.user_id) \
+    ORDER BY quotes.created_at, quotes.id";
+    let mut stmt = conn.prepare_cached(sql)?;
+
+    let mut results = Vec::new();
+    let mut rows = stmt.query([])?;
+    while let Some(row) = rows.next()? {
+        results.push(QuoteRow::try_from(row)?)
+    }
+
+    Ok(results)
 }
 
 pub fn user_quotes(
@@ -80,16 +118,7 @@ pub fn user_quotes(
     let mut results = Vec::new();
     let mut rows = stmt.query([user_id])?;
     while let Some(row) = rows.next()? {
-        results.push(QuoteRow {
-            id: row.get(0)?,
-            user_id: row.get(1)?,
-            quote_body: row.get(2)?,
-            created_at: row.get(3)?,
-            poster_username: row.get(4)?,
-            rating: row.get(5)?,
-            parent_quote_id: row.get(6)?,
-            parent_quote_username: row.get(7)?,
-        })
+        results.push(QuoteRow::try_from(row)?)
     }
 
     Ok(results)
@@ -117,18 +146,7 @@ pub fn get_quote(
     ORDER BY quotes.created_at, quotes.id";
     let mut stmt = conn.prepare_cached(sql)?;
 
-    match stmt.query_row([quote_id], |row| {
-        Ok(QuoteRow {
-            id: row.get(0)?,
-            user_id: row.get(1)?,
-            quote_body: row.get(2)?,
-            created_at: row.get(3)?,
-            poster_username: row.get(4)?,
-            rating: row.get(5)?,
-            parent_quote_id: row.get(6)?,
-            parent_quote_username: row.get(7)?,
-        })
-    }) {
+    match stmt.query_row([quote_id], |row| QuoteRow::try_from(row)) {
         Ok(quote) => Ok(Some(quote)),
         Err(rusqlite::Error::QueryReturnedNoRows) => Ok(None),
         Err(err) => Err(err),
@@ -157,18 +175,6 @@ pub fn quote_raters(
     Ok(results)
 }
 
-#[derive(Serialize)]
-#[serde(crate = "rocket::serde")]
-pub struct UserRow {
-    pub id: i64,
-    pub username: String,
-    pub email: String,
-    pub firstname: String,
-    pub surname: String,
-    pub last_posted: Option<u32>,
-    pub favourite_quote_id: Option<i64>,
-}
-
 pub fn get_user(conn: &mut rusqlite::Connection, user_id: i64) -> Result<UserRow, rusqlite::Error> {
     let sql = "\
     SELECT \
@@ -183,17 +189,7 @@ pub fn get_user(conn: &mut rusqlite::Connection, user_id: i64) -> Result<UserRow
     WHERE id = ?";
     let mut stmt = conn.prepare_cached(sql)?;
 
-    stmt.query_row([user_id], |row| {
-        Ok(UserRow {
-            id: row.get(0)?,
-            username: row.get(1)?,
-            email: row.get(2)?,
-            firstname: row.get(3)?,
-            surname: row.get(4)?,
-            last_posted: row.get(5)?,
-            favourite_quote_id: row.get(6)?,
-        })
-    })
+    stmt.query_row([user_id], |row| UserRow::try_from(row))
 }
 
 pub fn get_user_by_username(
@@ -423,9 +419,41 @@ pub fn last_quoted(
     Ok(timestamp)
 }
 
-pub fn migrate(conn: &mut rusqlite::Connection) -> Result<()> {
-    embedded::migrations::runner().run(conn)?;
-    Ok(())
+pub fn migrate(conn: &mut rusqlite::Connection) -> Result<refinery::Report, refinery::Error> {
+    embedded::migrations::runner().run(conn)
+}
+
+impl<'stmt> TryFrom<&Row<'stmt>> for QuoteRow {
+    type Error = rusqlite::Error;
+
+    fn try_from(row: &Row) -> Result<Self, Self::Error> {
+        Ok(QuoteRow {
+            id: row.get(0)?,
+            user_id: row.get(1)?,
+            quote_body: row.get(2)?,
+            created_at: row.get(3)?,
+            poster_username: row.get(4)?,
+            rating: row.get(5)?,
+            parent_quote_id: row.get(6)?,
+            parent_quote_username: row.get(7)?,
+        })
+    }
+}
+
+impl<'stmt> TryFrom<&Row<'stmt>> for UserRow {
+    type Error = rusqlite::Error;
+
+    fn try_from(row: &Row) -> Result<Self, Self::Error> {
+        Ok(UserRow {
+            id: row.get(0)?,
+            username: row.get(1)?,
+            email: row.get(2)?,
+            firstname: row.get(3)?,
+            surname: row.get(4)?,
+            last_posted: row.get(5)?,
+            favourite_quote_id: row.get(6)?,
+        })
+    }
 }
 
 mod embedded {

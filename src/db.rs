@@ -1,9 +1,11 @@
 use std::collections::HashMap;
 use std::convert::TryFrom;
+use std::str::FromStr;
 
 use rocket::serde::Serialize;
+use rocket_sync_db_pools::r2d2_sqlite::rusqlite::types::ToSqlOutput;
 use rocket_sync_db_pools::{database, rusqlite};
-use rusqlite::{named_params, Row};
+use rusqlite::{named_params, Row, ToSql};
 
 // FIXME: Is 16 (the default) statements in the statement cache enough
 
@@ -42,6 +44,15 @@ pub struct UserRow {
     pub surname: String,
     pub last_posted: Option<u32>,
     pub favourite_quote_id: Option<i64>,
+}
+
+#[derive(Copy, Clone)]
+pub enum Rating {
+    One = 1,
+    Two = 2,
+    Three = 3,
+    Four = 4,
+    Five = 5,
 }
 
 pub fn home_query(conn: &mut rusqlite::Connection) -> Result<Vec<HomeRow>, rusqlite::Error> {
@@ -151,6 +162,51 @@ pub fn get_quote(
         Err(rusqlite::Error::QueryReturnedNoRows) => Ok(None),
         Err(err) => Err(err),
     }
+}
+
+pub fn rate_quote(
+    conn: &mut rusqlite::Connection,
+    user_id: i64,
+    quote_id: i64,
+    rating: Rating,
+) -> Result<(), rusqlite::Error> {
+    let tx = conn.transaction()?;
+
+    let add_rating = "UPDATE quotes SET rating = rating + :rating WHERE id = :quote_id";
+    let insert_rating = "INSERT INTO ratings (quote_id, user_id) VALUES (:quote_id, :user_id)";
+
+    // Add the rating to quote rating
+    let updated = tx.execute(
+        add_rating,
+        named_params! { ":rating": rating, ":quote_id": quote_id },
+    )?;
+    if updated == 0 {
+        // Row not found for whatever reason
+        return Err(rusqlite::Error::QueryReturnedNoRows);
+    }
+
+    // Insert ratings record
+    tx.execute(
+        insert_rating,
+        named_params! { ":quote_id": quote_id, ":user_id": user_id },
+    )?;
+
+    tx.commit()
+}
+
+pub fn rating_exists(
+    conn: &mut rusqlite::Connection,
+    user_id: i64,
+    quote_id: i64,
+) -> Result<bool, rusqlite::Error> {
+    let sql = "SELECT count(id) FROM ratings WHERE user_id = :user_id AND quote_id = :quote_id";
+    let mut stmt = conn.prepare_cached(sql)?;
+
+    let count: Option<usize> = stmt.query_row(
+        named_params! { ":user_id": user_id, ":quote_id": quote_id },
+        |row| row.get(0),
+    )?;
+    Ok(count.unwrap_or(0) > 0)
 }
 
 /// Returns a map of quote id to rater ids
@@ -453,6 +509,29 @@ impl<'stmt> TryFrom<&Row<'stmt>> for UserRow {
             last_posted: row.get(5)?,
             favourite_quote_id: row.get(6)?,
         })
+    }
+}
+
+impl ToSql for Rating {
+    fn to_sql(&self) -> rusqlite::Result<ToSqlOutput<'_>> {
+        Ok(ToSqlOutput::Owned(rusqlite::types::Value::Integer(
+            *self as i64,
+        )))
+    }
+}
+
+impl FromStr for Rating {
+    type Err = ();
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        match s {
+            "1" => Ok(Rating::One),
+            "2" => Ok(Rating::Two),
+            "3" => Ok(Rating::Three),
+            "4" => Ok(Rating::Four),
+            "5" => Ok(Rating::Five),
+            _ => Err(()),
+        }
     }
 }
 

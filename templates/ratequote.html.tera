@@ -7,7 +7,7 @@
         by {{ user.username }} currently has
 
         {# Get current rating #}
-        {% set raters = ratings[quote.id] %}
+        {% set raters = ratings[quote.id] | default(value = []) %}
         {% if quote.rating > 0 %}
             {# This quote does have a rating #}
             a rating of:

@@ -14,7 +14,8 @@
           <TD colspan=4 align="right">
               <A href="/user/{{ username }}">
               <IMG src="/public/profile.gif" border=0 width=105 height=23></A>
-              <A href="/quotes/{{ username }}/new">
+              {# <A href="/quotes/{{ username }}/new"> #}
+              <A href="#">
               <img src="/public/newquote.gif" alt"Post New Quote" height=23 width=127 border=0>
               </A>
           </TD>
@@ -67,7 +68,8 @@
               <IMG src="/public/lightning.gif" border=0></A>
           {% else %}
               {# This quote has no response, use the pencil icon #}
-              <A href="/quotes/{{ username }}/new?ref={{ quote.id }}">
+              {# <A href="/quotes/{{ username }}/new?ref={{ quote.id }}"> #}
+              <A href="#">
               <IMG src="/public/pencil.gif" border=0 title="Add Linked Response"></A>
           {% endif %}
 

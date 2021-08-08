@@ -14,7 +14,8 @@
           <TD colspan=4 align="right">
               <A href="/user/{{ username }}">
               <IMG src="/public/profile.gif" border=0 width=105 height=23></A>
-              <A href="/quotes/{{ username }}/new">
+              {# <A href="/quotes/{{ username }}/new"> #}
+              <A href="#">
               <img src="/public/newquote.gif" alt"Post New Quote" height=23 width=127 border=0>
               </A>
           </TD>
@@ -67,7 +68,8 @@
               <IMG src="/public/lightning.gif" border=0></A>
           {% else %}
               {# This quote has no response, use the pencil icon #}
-              <A href="/quotes/{{ username }}/new?ref={{ quote.id }}">
+              {# <A href="/quotes/{{ username }}/new?ref={{ quote.id }}"> #}
+              <A href="#">
               <IMG src="/public/pencil.gif" border=0 title="Add Linked Response"></A>
           {% endif %}
 
@@ -85,23 +87,20 @@
               {% set ratings_count = raters | length %}
               {% set rating = quote.rating / ratings_count | round %}
 
-              {# FIXME #}
-              {# if(!in_array($viewer, $raters)) { #}
-                  {# I haven't rated this quote yet #}
-                  {# <A href="$_SERVER[SCRIPT_NAME]?page=quotes&action=ratequote&ref= #}
-                  {# echo   $username,$i+1,"">"; #}
-              {# } #}
-
               {# Display the appropriate stars #}
-              <IMG src="/public/{{ rating }}star.gif" border=0>
-
-              {# if(!in_array($viewer, $raters)) { #}
-                  {# </A> #}
-              {# } #}
+              {% if raters is containing(current_user.id) %}
+                  <IMG src="/public/{{ rating }}star.gif" border=0>
+              {% else %}
+                  {# I haven't rated this quote yet #}
+                  <A href="/quotes/rate/{{ quote.id }}">
+                      <IMG src="/public/{{ rating }}star.gif" border=0>
+                  </A>
+              {% endif %}
           {% else %}
               {# This quote has never been rated #}
-              {#<A href="$_SERVER[SCRIPT_NAME]?page=quotes&action=ratequote&ref=$username,$i+1,">#}<SPAN class="small">Unrated</SPAN>
-              {# </A> #}
+              <A href="/quotes/rate/{{ quote.id }}">
+                  <SPAN class="small">Unrated</SPAN>
+              </A>
           {% endif %}
 
           </TD>

@@ -5,8 +5,8 @@
     <A href="/">Quotes Home</A>
     <SPAN class="quotes_links seperator">&middot;</SPAN>
     <A href="/quotes">View All</A>
-    <SPAN class="quotes_links seperator">&middot;</SPAN>
-    <A href="/addquote">Add Quote</A>
+    {# <SPAN class="quotes_links seperator">&middot;</SPAN> #}
+    {# <A href="/addquote">Add Quote</A> #}
     <SPAN class="quotes_links seperator">&middot;</SPAN>
     <A href="/user/{{ current_user.username }}">Manage Profile</A>
     {# <?php } else { ?> #}

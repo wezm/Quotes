@@ -141,6 +141,12 @@ pub fn login(flash: Option<FlashMessage<'_>>) -> Template {
     Template::render("login", context)
 }
 
+impl AuthenticatedUser {
+    pub fn id(&self) -> i64 {
+        self.0.id
+    }
+}
+
 fn verify(hash: &str, password: &[u8]) -> bool {
     argon2::verify_encoded(hash, password).unwrap_or(false)
 }

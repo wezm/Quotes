@@ -48,7 +48,8 @@
         <TD align="center">
             <A href="/user/{{ user.username }}" title="View Profile">
             <IMG src="/public/profileicon.gif" width=16 height=16 border=0></A>
-            <A href="/quotes/{{ user.username }}/new" title="Add Quote">
+            {# <A href="/quotes/{{ user.username }}/new" title="Add Quote"> #}
+            <A href="#" title="Add Quote">
             <IMG src="/public/newquoteicon.gif" width=16 height=16 border=0></A>
         </TD>
 

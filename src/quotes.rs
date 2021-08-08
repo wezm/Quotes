@@ -7,7 +7,7 @@ use rocket::Route;
 use rocket_dyn_templates::Template;
 
 use crate::auth::{self, AuthenticatedUser};
-use crate::db::{self, HomeRow, QuoteRow, QuotesDb};
+use crate::db::{self, HomeRow, QuoteRow, QuotesDb, UserRow};
 
 pub fn routes() -> Vec<Route> {
     routes![
@@ -16,7 +16,9 @@ pub fn routes() -> Vec<Route> {
         quotes,
         quotes_redirect,
         all_quotes,
-        all_quotes_redirect
+        all_quotes_redirect,
+        rate_quote,
+        rate_quote_redirect,
     ]
 }
 
@@ -47,6 +49,17 @@ struct AllQuotesContext<'f> {
     title: String,
     flash: Option<FlashMessage<'f>>,
     quotes: Vec<QuotesContext<'f>>,
+    current_user: AuthenticatedUser,
+}
+
+#[derive(Serialize)]
+#[serde(crate = "rocket::serde")]
+struct RateQuoteContext<'f> {
+    title: String,
+    flash: Option<FlashMessage<'f>>,
+    quote: QuoteRow,
+    user: UserRow,
+    ratings: HashMap<i64, Vec<i64>>,
     current_user: AuthenticatedUser,
 }
 
@@ -144,4 +157,35 @@ async fn all_quotes(
         current_user,
     };
     Ok(Some(Template::render("allquotes", context)))
+}
+
+#[get("/quotes/rate/<_quote_id>", rank = 2)]
+fn rate_quote_redirect(_quote_id: i64) -> Redirect {
+    Redirect::to(uri!(auth::login))
+}
+
+#[get("/quotes/rate/<quote_id>")]
+async fn rate_quote(
+    current_user: AuthenticatedUser,
+    db: QuotesDb,
+    quote_id: i64,
+    flash: Option<FlashMessage<'_>>,
+) -> Result<Option<Template>, Debug<rusqlite::Error>> {
+    let quote = match db.run(move |conn| db::get_quote(conn, quote_id)).await? {
+        Some(quote) => quote,
+        None => return Ok(None),
+    };
+    let quote_user_id = quote.user_id;
+    let user = db.run(move |conn| db::get_user(conn, quote_user_id)).await?;
+    let ratings = db.run(move |conn| db::quote_raters(conn, quote_user_id)).await?;
+
+    let context = RateQuoteContext {
+        title: String::from("Rate Quote"),
+        flash,
+        quote,
+        user,
+        ratings,
+        current_user,
+    };
+    Ok(Some(Template::render("ratequote", context)))
 }

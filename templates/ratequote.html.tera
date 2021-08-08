@@ -1,0 +1,42 @@
+{% extends "layout" %}
+
+{% block content %}
+    {# Display the quote #}
+    <p>
+        <SPAN class="quote">"{{ quote.quote_body | striptags }}</SPAN>
+        by {{ user.username }} currently has
+
+        {# Get current rating #}
+        {% set raters = ratings[quote.id] %}
+        {% if quote.rating > 0 %}
+            {# This quote does have a rating #}
+            a rating of:
+            {% set ratings_count = raters | length %}
+            {% set rating = quote.rating / ratings_count | round %}
+
+            <IMG src="/public/{{ rating }}star.gif" border=0>
+        {% else %}
+            {# This quote has never been rated #}
+            no rating.
+        {% endif %}
+    </p>
+
+    {% if raters is containing(current_user.id) %}
+        You have already rated this quote.
+    {% else %}
+      <form action="/quotes/rate" method="POST">
+          Select your rating for this quote, your vote is final and can
+          not be changed:
+
+          <input type="hidden" name="quote_id" value="{{ quote.id }}">
+          <SELECT name="rating">
+                <OPTION value="1">1 star</OPTION>
+                <OPTION value="2">2 stars</OPTION>
+                <OPTION value="3" selected="yes">3 stars</OPTION>
+                <OPTION value="4">4 stars</OPTION>
+                <OPTION value="5">5 stars</OPTION>
+            </SELECT>
+            <input type="submit" value="Rate Quote">
+        </FORM>
+    {% endif %}
+{% endblock content %}

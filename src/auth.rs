@@ -9,9 +9,9 @@ use rocket::outcome::{try_outcome, IntoOutcome};
 use rocket::request::{FlashMessage, FromRequest, Outcome, Request};
 use rocket::response::{Debug, Flash, Redirect};
 use rocket::serde::Serialize;
+use rocket::time::Duration;
 use rocket::Route;
-use rocket_dyn_templates::Template;
-use time::Duration; // for Cookie
+use rocket_dyn_templates::Template; // for Cookie
 
 use crate::db::{self, QuotesDb, UserRow};
 use crate::{quotes, QuotesError};

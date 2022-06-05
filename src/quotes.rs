@@ -42,7 +42,7 @@ struct QuotesContext<'f> {
     username: String,
     quotes: Vec<QuoteRow>,
     highlight: Option<i64>,
-    ratings: HashMap<i64, Vec<i64>>,
+    ratings: HashMap<String, Vec<i64>>,
     current_user: AuthenticatedUser,
 }
 
@@ -83,7 +83,7 @@ pub async fn home(
     db: QuotesDb,
     flash: Option<FlashMessage<'_>>,
 ) -> Result<Template, Debug<rusqlite::Error>> {
-    let rows = db.run(|conn| db::home_query(conn)).await?;
+    let rows = db.run(db::home_query).await?;
     Ok(Template::render(
         "home",
         HomeContext {
@@ -108,13 +108,16 @@ async fn quotes(
     highlight: Option<i64>,
     flash: Option<FlashMessage<'_>>,
 ) -> Result<Option<Template>, Debug<rusqlite::Error>> {
-    let users = db.run(|conn| db::user_map(conn)).await?;
+    let users = db.run(db::user_map).await?;
     let user_id = match users.get(&username) {
         Some(user) => user.id,
         None => return Ok(None),
     };
     let quotes = db.run(move |conn| db::user_quotes(conn, user_id)).await?;
-    let ratings = db.run(move |conn| db::quote_raters(conn, user_id)).await?;
+    let ratings = db
+        .run(move |conn| db::quote_raters(conn, user_id))
+        .await
+        .map(stringify_ratings)?;
     Ok(Some(Template::render(
         "quotes",
         QuotesContext {
@@ -141,12 +144,15 @@ async fn all_quotes(
     highlight: Option<i64>,
     flash: Option<FlashMessage<'_>>,
 ) -> Result<Option<Template>, Debug<rusqlite::Error>> {
-    let users = db.run(|conn| db::user_map(conn)).await?;
+    let users = db.run(db::user_map).await?;
     let mut quotes = Vec::new();
     for (username, user) in users {
         let user_id = user.id;
         let user_quotes = db.run(move |conn| db::user_quotes(conn, user_id)).await?;
-        let ratings = db.run(move |conn| db::quote_raters(conn, user_id)).await?;
+        let ratings = db
+            .run(move |conn| db::quote_raters(conn, user_id))
+            .await
+            .map(stringify_ratings)?;
         let context = QuotesContext {
             title: format!("{}'s quotes", username),
             flash: None,
@@ -269,4 +275,12 @@ impl<'r> FromFormField<'r> for Rating {
             _ => Err(form::Error::validation("rating must be between 1 and 5"))?,
         }
     }
+}
+
+// Template contexts require all keys to be strings
+fn stringify_ratings(ratings: HashMap<i64, Vec<i64>>) -> HashMap<String, Vec<i64>> {
+    ratings
+        .into_iter()
+        .map(|(key, value)| (key.to_string(), value))
+        .collect()
 }

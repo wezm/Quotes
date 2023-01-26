@@ -209,9 +209,12 @@ fn ordinal(num: usize) -> &'static str {
 fn html_date(timestamp: u32) -> String {
     if timestamp != 0 {
         // {{ timestamp + 36000 | date(format='%-d %b %Y <span class="time">%-I:%M %p</span>') | safe }}
-        NaiveDateTime::from_timestamp(i64::from(timestamp) + 36000, 0)
-            .format("%-d %b %Y <span class=\"time\">%-I:%M %p</span>")
-            .to_string()
+        NaiveDateTime::from_timestamp_opt(i64::from(timestamp) + 36000, 0)
+            .map(|date| {
+                date.format("%-d %b %Y <span class=\"time\">%-I:%M %p</span>")
+                    .to_string()
+            })
+            .unwrap_or_else(|| String::from("Invalid"))
     } else {
         String::from("N/A")
     }

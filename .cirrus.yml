@@ -1,8 +1,14 @@
+env:
+  PATH: "$HOME/.cargo/bin:$PATH"
+  RUST_VERSION: 'stable'
+  AWS_ACCESS_KEY_ID: ENCRYPTED[5645ae34a0b6745a48fb51e40f8ed8ed58e4ac0373305f9f8891538f7cd917687e928f9ccec3248872d4b27909d11e40]
+  AWS_SECRET_ACCESS_KEY: ENCRYPTED[fa3b69a532ab70bdbc5f887f1f57403e0aa306c963cd8f472349c54edff70c75349de2fb018f6f4e82befefee099b459]
+
 task:
   name: Build (Alpine Linux)
   container:
-    image: alpine:3.15
-    cpu: 8
+    image: alpine:3.17
+    cpu: 4
   environment:
     RUSTFLAGS: "-C target-cpu=native"
     PATH: "$HOME/.cargo/bin:$PATH"
@@ -14,3 +20,29 @@ task:
   test_script:
     - cargo test
   before_cache_script: rm -rf $HOME/.cargo/registry/index
+
+task:
+  name: Build (Debian Linux)
+  container:
+    image: debian:10-slim
+    cpu: 4
+  cargo_cache:
+    folder: $HOME/.cargo/registry
+    fingerprint_script: cat Cargo.lock
+  install_script:
+    - apt-get update && apt-get install -y --no-install-recommends git ca-certificates curl gcc libc6-dev musl-tools libsqlite3-dev
+    - curl https://sh.rustup.rs -sSf | sh -s -- -y --profile minimal --default-toolchain ${RUST_VERSION}
+    - rustup target add x86_64-unknown-linux-musl
+    - mkdir ~/bin
+    - curl -L https://releases.wezm.net/upload-to-s3/0.2.0/upload-to-s3-0.2.0-x86_64-unknown-linux-musl.tar.gz | tar xzf - -C ~/bin
+  test_script:
+    - cargo test
+  publish_script: |
+    tag=$(git describe --exact-match HEAD 2>/dev/null || true)
+    if [ -n "$tag" ]; then
+      cargo build --release --locked --target x86_64-unknown-linux-musl
+      tarball="quotes-${tag}-x86_64-unknown-linux-musl.tar.gz"
+      strip target/x86_64-unknown-linux-musl/release/quotes
+      tar zcf "$tarball" -C target/x86_64-unknown-linux-musl/release quotes
+      ~/bin/upload-to-s3 -b releases.wezm.net "$tarball" "quotes/$tag/$tarball"
+    fi

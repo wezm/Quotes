@@ -4,7 +4,7 @@
 use std::collections::HashMap;
 
 use rocket::form::Form;
-use rocket::http::{Cookie, CookieJar};
+use rocket::http::{Cookie, CookieJar, Status};
 use rocket::outcome::{try_outcome, IntoOutcome};
 use rocket::request::{FlashMessage, FromRequest, Outcome, Request};
 use rocket::response::{Debug, Flash, Redirect};
@@ -60,19 +60,19 @@ impl<'r> FromRequest<'r> for AuthenticatedUser {
         let db = try_outcome!(request
             .guard::<QuotesDb>()
             .await
-            .map_failure(|(status, ())| (status, AuthenticatedUserError::GuardFailure)));
+            .map_error(|(status, ())| (status, AuthenticatedUserError::GuardFailure)));
 
         let user_id = try_outcome!(request
             .cookies()
             .get_private(QUOTES_SESSION)
             .and_then(|cookie| cookie.value().parse().ok())
-            .or_forward(()));
+            .or_forward(Status::BadRequest));
 
         db.run(move |conn| db::get_user(conn, user_id))
             .await
             .map(AuthenticatedUser)
             .map_err(|err| err.into())
-            .or_forward(())
+            .or_forward(Status::NotFound)
     }
 }
 
@@ -96,12 +96,11 @@ async fn do_login(
                 .map_err(QuotesError::from)?;
 
             if valid {
-                let cookie = Cookie::build(QUOTES_SESSION, user.id.to_string())
+                let cookie = Cookie::build((QUOTES_SESSION, user.id.to_string()))
                     .path("/")
                     .secure(SECURE_COOKIE)
                     .http_only(true)
-                    .max_age(Duration::weeks(1))
-                    .finish();
+                    .max_age(Duration::weeks(1));
                 cookies.add_private(cookie);
 
                 Ok(Flash::success(
@@ -121,7 +120,7 @@ async fn do_login(
 
 #[get("/logout")]
 fn logout(cookies: &CookieJar<'_>) -> Template {
-    cookies.remove_private(Cookie::named(QUOTES_SESSION));
+    cookies.remove_private(Cookie::from(QUOTES_SESSION));
     let mut context = HashMap::new();
     context.insert("title", "Goodbye");
     Template::render("logout", context)

@@ -1,7 +1,7 @@
 use std::borrow::Cow;
 use std::collections::HashMap;
 
-use chrono::NaiveDateTime;
+use chrono::DateTime;
 use rocket::response::{Debug, Redirect};
 use rocket::serde::Serialize;
 use rocket::Route;
@@ -209,7 +209,7 @@ fn ordinal(num: usize) -> &'static str {
 fn html_date(timestamp: u32) -> String {
     if timestamp != 0 {
         // {{ timestamp + 36000 | date(format='%-d %b %Y <span class="time">%-I:%M %p</span>') | safe }}
-        NaiveDateTime::from_timestamp_opt(i64::from(timestamp) + 36000, 0)
+        DateTime::from_timestamp(i64::from(timestamp) + 36000, 0)
             .map(|date| {
                 date.format("%-d %b %Y <span class=\"time\">%-I:%M %p</span>")
                     .to_string()

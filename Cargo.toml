@@ -7,15 +7,15 @@ default-run = "quotes"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-chrono = {version = "0.4.24", default-features = false, features = ["std", "clock"]} # needs to match tera
-getrandom = "0.2.8"
+chrono = {version = "0.4.35", default-features = false, features = ["std", "clock"]} # needs to match tera
+getrandom = "0.2.12"
 gumdrop = "0.8.1"
-log = "0.4.17"
+log = "0.4.21"
 mailgun-sdk = "0.1.1"
 refinery = { version = "0.8", features = ["rusqlite"] }
 rocket = { version = "0.5.0", features = ["secrets"] }
 rusqlite = "0.29.0"
-rust-argon2 = { version = "1.0.0", default-features = false }
+rust-argon2 = { version = "2.1.0", default-features = false }
 tokio = "1"
 
 [dependencies.rocket_sync_db_pools]

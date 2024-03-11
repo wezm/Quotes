@@ -98,9 +98,10 @@ async fn profile(
         // Not top user
         let rival = users.iter().find(|rival| rival.id == *rival_id).unwrap();
         format!(
-            r#"<a href="/{username}">{username}</a>, {num} quotes ahead"#,
+            r#"<a href="{url}">{username}</a>, {num} quotes ahead"#,
             username = rival.username,
-            num = rival_count - total_quotes
+            num = rival_count - total_quotes,
+            url = uri!(profile(username = &rival.username))
         )
     } else {
         String::from("None")
@@ -112,9 +113,10 @@ async fn profile(
         // Not last user
         let rival = users.iter().find(|rival| rival.id == *rival_id).unwrap();
         format!(
-            r#"<a href="/{username}">{username}</a>, {num} quotes behind"#,
+            r#"<a href="{url}">{username}</a>, {num} quotes behind"#,
             username = rival.username,
-            num = total_quotes - rival_count
+            num = total_quotes - rival_count,
+            url = uri!(profile(username = &rival.username))
         )
     } else {
         String::from("None")
@@ -125,8 +127,9 @@ async fn profile(
     if let Some((leader_id, leader_count)) = quote_counts.get(0) {
         let leader = users.iter().find(|rival| rival.id == *leader_id).unwrap();
         let label = format!(
-            r#"Quotes Behind Leader (<a href="/{username}">{username}</a>)"#,
-            username = leader.username
+            r#"Quotes Behind Leader (<a href="{url}">{username}</a>)"#,
+            username = leader.username,
+            url = uri!(profile(username = &leader.username))
         );
         rows.push(ProfileRow::new(label, leader_count - total_quotes));
     }
